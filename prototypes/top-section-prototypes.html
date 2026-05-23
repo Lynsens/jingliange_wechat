@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>净莲阁顶部区域原型</title>
+  <style>
+    :root {
+      --paper: #fbecdf;
+      --panel: #fffaf6;
+      --peach: #f7cfb4;
+      --ink: #17120f;
+      --muted: #7b6253;
+      --brown: #ad693e;
+      --soft: #f8dfca;
+      --line: rgba(23, 18, 15, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #efe1d5;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .intro {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .prototype {
+      border: 1px solid rgba(23, 18, 15, 0.12);
+      border-radius: 14px;
+      background: var(--panel);
+      padding: 16px;
+    }
+
+    .label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .label strong {
+      font-size: 16px;
+    }
+
+    .label span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .phone {
+      width: 300px;
+      min-height: 560px;
+      margin: 0 auto;
+      border-radius: 28px;
+      background: var(--paper);
+      box-shadow: 0 16px 44px rgba(23, 18, 15, 0.12);
+      overflow: hidden;
+    }
+
+    .screen {
+      padding: 42px 14px 20px;
+    }
+
+    .capsule {
+      width: 82px;
+      height: 26px;
+      margin-left: auto;
+      margin-bottom: 18px;
+      border: 1px solid rgba(23, 18, 15, 0.16);
+      border-radius: 999px;
+      opacity: 0.7;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .stat b,
+    .stat span {
+      display: block;
+    }
+
+    .stat b {
+      color: var(--brown);
+      font-size: 18px;
+      line-height: 22px;
+    }
+
+    .stat span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .tab {
+      min-width: 54px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 32px;
+      text-align: center;
+    }
+
+    .tab.active {
+      background: var(--brown);
+      color: #fff;
+      border-color: var(--brown);
+    }
+
+    .content-card {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 14px;
+    }
+
+    .content-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .content-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .hero {
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .hero-a {
+      background: var(--panel);
+      padding: 20px;
+    }
+
+    .hero-a .kicker,
+    .hero-a h2 {
+      font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
+      font-weight: 500;
+    }
+
+    .hero-a .kicker,
+    .hero-b .kicker,
+    .hero-c .kicker,
+    .hero-d .kicker {
+      display: block;
+      color: var(--brown);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 18px;
+    }
+
+    .hero-a h2,
+    .hero-b h2,
+    .hero-c h2,
+    .hero-d h2 {
+      margin: 10px 0 0;
+      font-size: 26px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .hero-a p,
+    .hero-b p,
+    .hero-c p,
+    .hero-d p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .hero-a h2 {
+      font-size: 30px;
+      line-height: 1.18;
+    }
+
+    .hero-a .line {
+      width: 58px;
+      height: 2px;
+      margin-top: 18px;
+      background: var(--ink);
+    }
+
+    .hero-b {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 16px;
+      align-items: center;
+      background: var(--peach);
+      padding: 18px;
+    }
+
+    .seal {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .hero-b h2 {
+      font-size: 23px;
+    }
+
+    .hero-c {
+      background: var(--panel);
+    }
+
+    .hero-c .logo-strip {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--peach);
+    }
+
+    .logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .hero-c .body {
+      padding: 16px;
+    }
+
+    .hero-c h2 {
+      font-size: 21px;
+      margin-top: 0;
+    }
+
+    .hero-d {
+      background: var(--ink);
+      color: #fff;
+      padding: 20px;
+    }
+
+    .hero-d .kicker,
+    .hero-d p {
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .hero-d .tag {
+      display: inline-block;
+      margin-top: 18px;
+      background: var(--brown);
+      color: #fff;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 26px;
+      padding: 0 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>顶部区域原型</h1>
+    <p class="intro">四个方向用于比较。下面的统计和 tabs 保留，方便判断顶部是否和功能区重复。</p>
+
+    <section class="grid">
+      <article class="prototype">
+        <div class="label">
+          <strong>A. 极简品牌引导</strong>
+          <span>推荐：最稳妥</span>
+        </div>
+        <div class="phone">
+          <div class="screen">
+            <div class="capsule"></div>
+            <section class="hero hero-a">
+              <span class="kicker">净莲阁</span>
+              <h2>素食 · 文化 · 净心</h2>
+              <p>今日菜单、活动与随喜功德，一处查看。</p>
+              <div class="line"></div>
+            </section>
+            <div class="stats">
+              <div class="stat"><b>3</b><span>素食</span></div>
+              <div class="stat"><b>0</b><span>随喜人次</span></div>
+              <div class="stat"><b>2</b><span>活动</span></div>
+            </div>
+            <div class="tabs">
+              <div class="tab active">首页</div>
+              <div class="tab">素食</div>
+              <div class="tab">功德榜</div>
+              <div class="tab">关于</div>
+            </div>
+            <div class="content-card">
+              <h3>今日推荐</h3>
+              <p>紫菜汤蛋花汤 · rice 200g · tofu 100g</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="prototype">
+        <div class="label">
+          <strong>B. 印章式入口</strong>
+          <span>更有东方感</span>
+        </div>
+        <div class="phone">
+          <div class="screen">
+            <div class="capsule"></div>
+            <section class="hero hero-b">
+              <div class="seal">莲</div>
+              <div>
+                <span class="kicker">净莲阁</span>
+                <h2>清净素食</h2>
+                <p>素食、茶会、公益活动。</p>
+              </div>
+            </section>
+            <div class="stats">
+              <div class="stat"><b>3</b><span>素食</span></div>
+              <div class="stat"><b>0</b><span>随喜人次</span></div>
+              <div class="stat"><b>2</b><span>活动</span></div>
+            </div>
+            <div class="tabs">
+              <div class="tab active">首页</div>
+              <div class="tab">素食</div>
+              <div class="tab">功德榜</div>
+              <div class="tab">关于</div>
+            </div>
+            <div class="content-card">
+              <h3>今日推荐</h3>
+              <p>紫菜汤蛋花汤 · rice 200g · tofu 100g</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="prototype">
+        <div class="label">
+          <strong>C. 小 logo 横幅</strong>
+          <span>保留品牌图形</span>
+        </div>
+        <div class="phone">
+          <div class="screen">
+            <div class="capsule"></div>
+            <section class="hero hero-c">
+              <div class="logo-strip">
+                <img class="logo" src="../miniprogram/images/jingliange-logo.jpg" alt="净莲阁 logo">
+                <div>
+                  <span class="kicker">净莲阁</span>
+                  <h2>素食 · 文化 · 净心</h2>
+                </div>
+              </div>
+              <div class="body">
+                <p>菜单、活动、功德榜，服务于日常到访。</p>
+              </div>
+            </section>
+            <div class="stats">
+              <div class="stat"><b>3</b><span>素食</span></div>
+              <div class="stat"><b>0</b><span>随喜人次</span></div>
+              <div class="stat"><b>2</b><span>活动</span></div>
+            </div>
+            <div class="tabs">
+              <div class="tab active">首页</div>
+              <div class="tab">素食</div>
+              <div class="tab">功德榜</div>
+              <div class="tab">关于</div>
+            </div>
+            <div class="content-card">
+              <h3>今日推荐</h3>
+              <p>紫菜汤蛋花汤 · rice 200g · tofu 100g</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="prototype">
+        <div class="label">
+          <strong>D. 深色水墨牌匾</strong>
+          <span>对比强，较重</span>
+        </div>
+        <div class="phone">
+          <div class="screen">
+            <div class="capsule"></div>
+            <section class="hero hero-d">
+              <span class="kicker">净莲阁</span>
+              <h2>素食 · 文化 · 净心</h2>
+              <p>让首页有明确的品牌起点。</p>
+              <span class="tag">今日开放</span>
+            </section>
+            <div class="stats">
+              <div class="stat"><b>3</b><span>素食</span></div>
+              <div class="stat"><b>0</b><span>随喜人次</span></div>
+              <div class="stat"><b>2</b><span>活动</span></div>
+            </div>
+            <div class="tabs">
+              <div class="tab active">首页</div>
+              <div class="tab">素食</div>
+              <div class="tab">功德榜</div>
+              <div class="tab">关于</div>
+            </div>
+            <div class="content-card">
+              <h3>今日推荐</h3>
+              <p>紫菜汤蛋花汤 · rice 200g · tofu 100g</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<view class="admin-page">
+  <view class="admin-hero">
+    <text class="admin-kicker">净莲阁</text>
+    <text class="admin-desc">{{adminAuthed ? '当前支持素食菜单新增与删除。关于、活动编辑需要后端增加接口后接入。' : '请输入管理员账号和密码后继续。'}}</text>
+  </view>
+
+  <view wx:if="{{!adminAuthed}}" class="panel login-panel">
+    <text class="panel-title">管理员登录</text>
+    <input
+      class="field"
+      placeholder="管理员账号"
+      placeholder-class="placeholder"
+      value="{{adminUsername}}"
+      bindinput="onAdminUsernameInput"
+    />
+    <input
+      class="field"
+      password
+      placeholder="管理员密码"
+      placeholder-class="placeholder"
+      value="{{adminPassword}}"
+      bindinput="onAdminPasswordInput"
+    />
+    <button class="primary-btn" bindtap="loginAdmin">登录</button>
+    <text class="login-note">登录后可新增和删除素食菜单。</text>
+  </view>
+
+  <block wx:else>
+  <view class="panel">
+    <view class="panel-header">
+      <text class="panel-title">新增素食</text>
+      <button class="ghost-btn" bindtap="resetForm">清空</button>
+    </view>
+
+    <input
+      class="field"
+      placeholder="菜品名称"
+      placeholder-class="placeholder"
+      value="{{form.name}}"
+      data-field="name"
+      bindinput="updateField"
+    />
+    <textarea
+      class="textarea"
+      placeholder="菜品介绍"
+      placeholder-class="placeholder"
+      value="{{form.desc}}"
+      data-field="desc"
+      bindinput="updateField"
+    />
+    <view class="image-uploader">
+      <image wx:if="{{form.imageUrl}}" class="image-preview" src="{{form.imageUrl}}" mode="aspectFill"></image>
+      <view wx:else class="image-placeholder">
+        <text>菜品图片</text>
+      </view>
+      <view class="image-actions">
+        <text class="image-url">{{form.imageUrl ? '图片已上传' : '从相册选择或拍照上传'}}</text>
+        <button class="ghost-btn image-btn" loading="{{uploadingImage}}" bindtap="chooseMenuImage">选择图片</button>
+      </view>
+    </view>
+    <text class="field-label">所含食材</text>
+    <textarea
+      class="textarea small"
+      placeholder="每行一个：豆腐: 100g"
+      placeholder-class="placeholder"
+      value="{{form.ingredients}}"
+      data-field="ingredients"
+      bindinput="updateField"
+    />
+    <text class="field-label">营养详情</text>
+    <textarea
+      class="textarea small"
+      placeholder="每行一个：蛋白质: 10g"
+      placeholder-class="placeholder"
+      value="{{form.nutrition}}"
+      data-field="nutrition"
+      bindinput="updateField"
+    />
+
+    <button class="primary-btn" loading="{{saving}}" bindtap="submitMenu">保存菜品</button>
+  </view>
+
+  <view class="panel">
+    <view class="panel-header">
+      <text class="panel-title">菜单列表</text>
+      <button class="ghost-btn" loading="{{loading}}" bindtap="loadMenus">刷新</button>
+    </view>
+
+    <view wx:if="{{menus.length > 0}}" class="menu-list">
+      <view wx:for="{{menus}}" wx:key="id" class="menu-item">
+        <view class="menu-copy">
+          <text class="menu-name">{{item.name}}</text>
+          <text class="menu-desc">{{item.desc}}</text>
+          <text class="menu-meta">ID {{item.id}} · {{item.likeCount}} 人喜欢</text>
+        </view>
+        <button
+          class="delete-btn"
+          data-id="{{item.id}}"
+          data-name="{{item.name}}"
+          bindtap="deleteMenu"
+        >
+          删除
+        </button>
+      </view>
+    </view>
+
+    <view wx:else class="empty-card">
+      <text class="empty-title">{{loading ? '正在加载菜单' : '暂无菜单'}}</text>
+      <text class="empty-desc">新增素食后会出现在这里。</text>
+    </view>
+  </view>
+  <button class="logout-btn" bindtap="logoutAdmin">退出管理</button>
+  </block>
+</view>

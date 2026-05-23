@@ -1,0 +1,273 @@
+<view class="page">
+  <scroll-view scroll-y class="page-scroll">
+    <view class="hero">
+      <view class="hero-main">
+        <view class="hero-copy">
+          <text class="hero-kicker">净莲阁</text>
+          <text class="hero-title">素食 · 文化 · 净心</text>
+          <text class="hero-desc">今日菜单、活动与随喜功德，一处查看。</text>
+          <view class="hero-ink-line"></view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{loading || offlineMode}}" class="status-strip {{offlineMode ? 'status-warn' : ''}}">
+      <text>{{loading ? '正在同步后端数据' : '后端未连接，当前显示预览数据'}}</text>
+      <text wx:if="{{backendError}}" class="status-detail">{{backendError}}</text>
+    </view>
+
+    <view class="stats-row">
+      <view class="stat-item" wx:for="{{quickStats}}" wx:key="label">
+        <text class="stat-value">{{item.value}}</text>
+        <text class="stat-label">{{item.label}}</text>
+      </view>
+    </view>
+
+    <scroll-view scroll-x class="tabs" show-scrollbar="{{false}}">
+      <view class="tab-track">
+        <view
+          wx:for="{{navItems}}"
+          wx:key="key"
+          class="tab {{activeTab === item.key ? 'tab-active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="switchTab"
+        >
+          {{item.title}}
+        </view>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{activeTab === 'home'}}" class="section">
+      <view class="section-header">
+        <text class="section-title">今日推荐</text>
+        <text class="section-subtitle">清淡、均衡、当季</text>
+      </view>
+
+      <view wx:if="{{featuredMenu}}" class="featured-menu" data-id="{{featuredMenu.id}}" bindtap="openMenuDetail">
+        <image wx:if="{{featuredMenu.imageUrl}}" src="{{featuredMenu.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
+        <view wx:else class="menu-art menu-art-green">
+          <text>{{featuredMenu.initial}}</text>
+        </view>
+        <view class="featured-content">
+          <text class="featured-title">{{featuredMenu.name}}</text>
+          <text class="featured-desc">{{featuredMenu.desc}}</text>
+          <view class="tag-row">
+            <text class="tag" wx:for="{{featuredMenu.ingredients}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-card">
+        <text class="empty-card-title">暂无推荐素食</text>
+        <text class="empty-card-desc">后台添加菜单后，这里会显示今日推荐。</text>
+      </view>
+
+      <view class="section-header compact">
+        <text class="section-title">近期活动</text>
+      </view>
+
+      <view wx:if="{{activities.length > 0}}" class="activity-list">
+        <view class="activity-item" wx:for="{{activities}}" wx:key="id">
+          <view class="activity-date">
+            <text>{{item.time}}</text>
+          </view>
+          <view class="activity-content">
+            <text class="activity-title">{{item.title}}</text>
+            <text class="activity-place">{{item.place}}</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-card">
+        <text class="empty-card-title">暂无近期活动</text>
+        <text class="empty-card-desc">活动发布后，会在首页同步展示。</text>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'menu'}}" class="section">
+      <view class="search-box">
+        <text class="search-icon">⌕</text>
+        <input
+          class="search-input"
+          placeholder="搜索菜名、食材"
+          placeholder-class="search-placeholder"
+          value="{{keyword}}"
+          bindinput="onSearchInput"
+        />
+        <button wx:if="{{keyword}}" class="clear-btn" bindtap="clearSearch">×</button>
+      </view>
+
+      <view wx:if="{{menus.length > 0}}" class="menu-list">
+        <view class="menu-card" wx:for="{{menus}}" wx:key="id">
+          <view class="menu-card-main" data-id="{{item.id}}" bindtap="openMenuDetail">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
+            <view wx:else class="menu-art menu-art-{{item.color}}">
+              <text>{{item.initial}}</text>
+            </view>
+            <view class="menu-info">
+              <view class="menu-title-row">
+                <text class="menu-name">{{item.name}}</text>
+                <text class="nutrition">{{item.nutrition}}</text>
+              </view>
+              <text class="menu-desc">{{item.desc}}</text>
+              <text class="detail-label compact-label">所含食材</text>
+              <view class="tag-row">
+                <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
+              </view>
+            </view>
+          </view>
+          <button
+            class="like-btn {{item.liked ? 'liked' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="toggleLike"
+          >
+            ♥ {{item.likeCount}}
+          </button>
+        </view>
+      </view>
+
+      <view wx:if="{{menus.length === 0}}" class="empty-state">
+        <text class="empty-title">{{keyword ? '没有找到相关素食' : '暂无素食菜单'}}</text>
+        <text class="empty-desc">{{keyword ? '换一个菜名或食材试试' : '后台添加菜单后，这里会自动展示'}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'donation'}}" class="section">
+      <view class="donation-panel">
+        <view>
+          <text class="panel-label">本年随喜总额</text>
+          <text class="donation-total">¥{{donationStats.totalAmount}}</text>
+        </view>
+        <view class="count-pill">{{donationStats.totalCount}} 人次</view>
+      </view>
+
+      <view class="form-panel">
+        <text class="form-title">随喜登记</text>
+        <input
+          class="form-input"
+          placeholder="昵称"
+          placeholder-class="form-placeholder"
+          value="{{donationName}}"
+          bindinput="onDonationNameInput"
+        />
+        <input
+          class="form-input stacked"
+          type="digit"
+          placeholder="金额"
+          placeholder-class="form-placeholder"
+          value="{{donationAmount}}"
+          bindinput="onDonationAmountInput"
+        />
+        <textarea
+          class="form-textarea"
+          placeholder="留言"
+          placeholder-class="form-placeholder"
+          value="{{donationMessage}}"
+          bindinput="onDonationMessageInput"
+        />
+        <button class="primary-btn" bindtap="submitDonationPreview">提交</button>
+      </view>
+
+      <view wx:if="{{donations.length > 0}}" class="leaderboard">
+        <view class="leader-item" wx:for="{{donations}}" wx:key="id">
+          <view class="rank">{{index + 1}}</view>
+          <view class="leader-content">
+            <view class="leader-topline">
+              <text class="donor-name">{{item.donorName}}</text>
+              <text class="donor-amount">¥{{item.amount}}</text>
+            </view>
+            <text class="donor-message">{{item.message}}</text>
+            <text class="donor-date">{{item.date}}</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-card">
+        <text class="empty-card-title">暂无随喜记录</text>
+        <text class="empty-card-desc">完成随喜登记后，功德榜会显示公开记录。</text>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'about'}}" class="section">
+      <view class="about-panel">
+        <image class="about-logo" src="../../images/jingliange-logo.jpg" mode="aspectFit"></image>
+        <text class="about-title">净莲阁</text>
+        <text class="about-copy">{{aboutDescription}}</text>
+      </view>
+
+      <view class="info-grid">
+        <view class="info-item">
+          <text class="info-label">开放时间</text>
+          <text class="info-value">09:00 - 18:00</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">地址</text>
+          <text class="info-value">净莲阁斋堂</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">联系电话</text>
+          <text class="info-value">待配置</text>
+        </view>
+      </view>
+
+      <button class="admin-entry" bindtap="openAdmin">内容管理</button>
+    </view>
+
+    <view class="bottom-space"></view>
+  </scroll-view>
+
+  <view wx:if="{{selectedMenu}}" class="detail-mask" bindtap="closeMenuDetail">
+    <view class="detail-sheet" catchtap="noop">
+      <view class="sheet-handle"></view>
+      <image wx:if="{{selectedMenu.imageUrl}}" src="{{selectedMenu.imageUrl}}" mode="aspectFill" class="sheet-photo"></image>
+      <view wx:else class="menu-art menu-art-{{selectedMenu.color}} sheet-art">
+        <text>{{selectedMenu.initial}}</text>
+      </view>
+      <text class="sheet-title">{{selectedMenu.name}}</text>
+      <text class="sheet-desc">{{selectedMenu.desc}}</text>
+      <view class="sheet-meta">
+        <text>{{selectedMenu.likeCount}} 人喜欢</text>
+      </view>
+      <view class="detail-group">
+        <text class="detail-label">所含食材</text>
+        <view class="tag-row detail-tags">
+          <text class="tag" wx:for="{{selectedMenu.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
+        </view>
+      </view>
+      <view class="detail-group">
+        <text class="detail-label">营养详情</text>
+        <view class="nutrition-list">
+          <text class="nutrition-item" wx:for="{{selectedMenu.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+        </view>
+      </view>
+      <view class="comments-panel">
+        <view class="comments-header">
+          <text class="comments-title">评论</text>
+          <text class="comments-count">{{menuComments.length}}</text>
+        </view>
+        <view wx:if="{{detailLoading}}" class="comment-empty">正在加载评论</view>
+        <view wx:elif="{{menuComments.length === 0}}" class="comment-empty">暂无评论</view>
+        <view wx:else class="comment-list">
+          <view class="comment-item" wx:for="{{menuComments}}" wx:key="id">
+            <view class="comment-avatar">{{item.avatar}}</view>
+            <view class="comment-body">
+              <view class="comment-topline">
+                <text class="comment-user">{{item.userId}}</text>
+                <text class="comment-date">{{item.date}}</text>
+              </view>
+              <text class="comment-text">{{item.comment}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="comment-form">
+          <input
+            class="comment-input"
+            placeholder="写下你的感受"
+            placeholder-class="form-placeholder"
+            value="{{menuCommentText}}"
+            bindinput="onMenuCommentInput"
+          />
+          <button class="comment-submit" bindtap="submitMenuComment">发送</button>
+        </view>
+      </view>
+      <button class="primary-btn sheet-btn" bindtap="closeMenuDetail">完成</button>
+    </view>
+  </view>
+</view>

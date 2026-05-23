@@ -1,0 +1,13 @@
+.DS_Store
+
+# WeChat DevTools local user overrides
+project.private.config.json
+
+# Generated dependency output and local installs
+node_modules/
+miniprogram/miniprogram_npm/
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
