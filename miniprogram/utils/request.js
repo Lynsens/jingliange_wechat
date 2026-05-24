@@ -13,6 +13,10 @@ function normalizeUploadImageUrl(imageUrl) {
     return ''
   }
 
+  if (imageUrl.indexOf('/images/') === 0) {
+    return ''
+  }
+
   if (imageUrl.indexOf('http://49.234.22.169:8000/') === 0) {
     return imageUrl.replace('http://49.234.22.169:8000', getApiRootUrl())
   }

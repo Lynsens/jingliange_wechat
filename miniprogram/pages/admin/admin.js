@@ -2,23 +2,80 @@ const api = require('../../services/api')
 const app = getApp()
 
 const DEFAULT_ADMIN_USERNAME = 'admin'
+const UNIT_OPTIONS = ['g', 'ml']
+const MAX_METRIC_ROWS = 3
+const IMAGE_COMPRESS_QUALITY = 72
+const IMAGE_COMPRESS_WIDTH = 1280
+let rowSeed = 0
 
-function toJsonObjectText(lines) {
+function createMetricRow() {
+  rowSeed += 1
+  return {
+    id: `row_${Date.now()}_${rowSeed}`,
+    name: '',
+    quantity: '',
+    unit: '',
+    unitIndex: 0
+  }
+}
+
+function createEmptyForm() {
+  return {
+    name: '',
+    desc: '',
+    imageUrl: '',
+    ingredients: [createMetricRow()],
+    nutrition: [createMetricRow()]
+  }
+}
+
+function rowsToJsonObjectText(rows) {
   const result = {}
-  lines
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .forEach((line) => {
-      const parts = line.split(/[:：]/)
-      const key = (parts.shift() || '').trim()
-      const value = parts.join(':').trim()
-      if (key && value) {
-        result[key] = value
-      }
-    })
+  rows.slice(0, MAX_METRIC_ROWS).forEach((row) => {
+    const name = row.name.trim()
+    const quantity = row.quantity.trim()
+    const unit = row.unit.trim()
+    if (name && quantity && unit) {
+      result[name] = `${quantity}${unit}`
+    }
+  })
 
   return JSON.stringify(result)
+}
+
+function hasCompleteRows(rows) {
+  return rows.some((row) => row.name.trim() && row.quantity.trim() && row.unit.trim())
+}
+
+function hasPartialRows(rows) {
+  return rows.some((row) => {
+    const values = [row.name.trim(), row.quantity.trim(), row.unit.trim()]
+    return values.some(Boolean) && values.some((value) => !value)
+  })
+}
+
+function parseMetricRows(value) {
+  const rows = []
+
+  try {
+    const parsed = JSON.parse(value || '{}')
+    if (parsed && typeof parsed === 'object') {
+      Object.keys(parsed).forEach((name) => {
+        const rawValue = String(parsed[name] || '')
+        const match = rawValue.match(/^([\d.]+)\s*(g|ml)$/i)
+        const row = createMetricRow()
+        row.name = name
+        row.quantity = match ? match[1] : rawValue.replace(/[^\d.]/g, '')
+        row.unit = match ? match[2].toLowerCase() : 'g'
+        row.unitIndex = UNIT_OPTIONS.indexOf(row.unit) >= 0 ? UNIT_OPTIONS.indexOf(row.unit) : 0
+        rows.push(row)
+      })
+    }
+  } catch (e) {
+    // Keep a blank row for legacy malformed values.
+  }
+
+  return rows.length ? rows.slice(0, MAX_METRIC_ROWS) : [createMetricRow()]
 }
 
 function formatMenu(item) {
@@ -26,8 +83,80 @@ function formatMenu(item) {
     id: item.id,
     name: item.name || '未命名素食',
     desc: item.desc || '暂无介绍',
+    imageUrl: item.image_url || '',
+    ingredients: item.ingredients || '',
+    nutrition: item.nutrition || '',
     likeCount: item.like_count || 0
   }
+}
+
+function filterAdminMenus(menus, keyword) {
+  const text = keyword.trim().toLowerCase()
+  if (!text) {
+    return menus
+  }
+
+  return menus.filter((item) => {
+    return `${item.id} ${item.name} ${item.desc}`.toLowerCase().indexOf(text) !== -1
+  })
+}
+
+function getFileInfo(filePath) {
+  return new Promise((resolve) => {
+    if (!wx.getFileInfo || !filePath) {
+      resolve(null)
+      return
+    }
+
+    wx.getFileInfo({
+      filePath,
+      success(res) {
+        resolve(res)
+      },
+      fail() {
+        resolve(null)
+      }
+    })
+  })
+}
+
+function compressImage(filePath) {
+  return new Promise((resolve) => {
+    if (!wx.compressImage || !filePath) {
+      resolve(filePath)
+      return
+    }
+
+    wx.compressImage({
+      src: filePath,
+      quality: IMAGE_COMPRESS_QUALITY,
+      compressedWidth: IMAGE_COMPRESS_WIDTH,
+      success(res) {
+        resolve(res.tempFilePath || filePath)
+      },
+      fail() {
+        resolve(filePath)
+      }
+    })
+  })
+}
+
+async function getSmallerImagePath(filePath) {
+  const compressedPath = await compressImage(filePath)
+  if (!compressedPath || compressedPath === filePath) {
+    return filePath
+  }
+
+  const [originalInfo, compressedInfo] = await Promise.all([
+    getFileInfo(filePath),
+    getFileInfo(compressedPath)
+  ])
+
+  if (originalInfo && compressedInfo && compressedInfo.size > 0 && compressedInfo.size < originalInfo.size) {
+    return compressedPath
+  }
+
+  return filePath
 }
 
 Page({
@@ -38,14 +167,14 @@ Page({
     loading: false,
     saving: false,
     uploadingImage: false,
+    menuKeyword: '',
+    unitOptions: UNIT_OPTIONS,
     menus: [],
-    form: {
-      name: '',
-      desc: '',
-      imageUrl: '',
-      ingredients: '',
-      nutrition: ''
-    }
+    displayMenus: [],
+    showEditor: false,
+    editingMenuId: 0,
+    formReady: true,
+    form: createEmptyForm()
   },
 
   onLoad() {
@@ -91,7 +220,9 @@ Page({
       this.setData({
         adminAuthed: true,
         adminUsername: result.username || username,
-        adminPassword: ''
+        adminPassword: '',
+        showEditor: false,
+        editingMenuId: 0
       })
       await this.loadMenus()
       wx.hideLoading()
@@ -110,7 +241,12 @@ Page({
     this.setData({
       adminAuthed: false,
       adminPassword: '',
-      menus: []
+      menuKeyword: '',
+      menus: [],
+      displayMenus: [],
+      showEditor: false,
+      editingMenuId: 0,
+      form: createEmptyForm()
     })
   },
 
@@ -145,8 +281,10 @@ Page({
     this.setData({ loading: true })
     try {
       const list = await api.getMenuList('')
+      const menus = Array.isArray(list) ? list.map(formatMenu) : []
       this.setData({
-        menus: Array.isArray(list) ? list.map(formatMenu) : [],
+        menus,
+        displayMenus: filterAdminMenus(menus, this.data.menuKeyword),
         loading: false
       })
     } catch (e) {
@@ -158,6 +296,44 @@ Page({
     }
   },
 
+  onMenuKeywordInput(e) {
+    const menuKeyword = e.detail.value
+    this.setData({
+      menuKeyword,
+      displayMenus: filterAdminMenus(this.data.menus, menuKeyword)
+    })
+  },
+
+  clearMenuKeyword() {
+    this.setData({
+      menuKeyword: '',
+      displayMenus: this.data.menus
+    })
+  },
+
+  startCreateMenu() {
+    this.setData({
+      formReady: false,
+      saving: false,
+      uploadingImage: false,
+      editingMenuId: 0,
+      showEditor: true
+    })
+
+    wx.nextTick(() => {
+      this.setData({
+        form: createEmptyForm(),
+        formReady: true
+      })
+      if (wx.pageScrollTo) {
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 200
+        })
+      }
+    })
+  },
+
   updateField(e) {
     const field = e.currentTarget.dataset.field
     this.setData({
@@ -167,13 +343,102 @@ Page({
 
   resetForm() {
     this.setData({
-      form: {
-        name: '',
-        desc: '',
-        imageUrl: '',
-        ingredients: '',
-        nutrition: ''
+      formReady: false,
+      saving: false,
+      uploadingImage: false,
+      editingMenuId: 0,
+      showEditor: false
+    })
+
+    wx.nextTick(() => {
+      this.setData({
+        form: createEmptyForm(),
+        formReady: true
+      })
+    })
+  },
+
+  editMenu(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const menu = this.data.menus.find((item) => item.id === id)
+    if (!menu) {
+      wx.showToast({
+        title: '菜单不存在',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({
+      formReady: false,
+      showEditor: true
+    })
+
+    wx.nextTick(() => {
+      this.setData({
+        editingMenuId: id,
+        form: {
+          name: menu.name,
+          desc: menu.desc,
+          imageUrl: menu.imageUrl,
+          ingredients: parseMetricRows(menu.ingredients),
+          nutrition: parseMetricRows(menu.nutrition)
+        },
+        formReady: true
+      })
+      if (wx.pageScrollTo) {
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 200
+        })
       }
+    })
+  },
+
+  cancelEdit() {
+    this.resetForm()
+  },
+
+  updateMetricField(e) {
+    const type = e.currentTarget.dataset.type
+    const index = Number(e.currentTarget.dataset.index)
+    const field = e.currentTarget.dataset.field
+    this.setData({
+      [`form.${type}[${index}].${field}`]: e.detail.value
+    })
+  },
+
+  addMetricRow(e) {
+    const type = e.currentTarget.dataset.type
+    if (this.data.form[type].length >= MAX_METRIC_ROWS) {
+      wx.showToast({
+        title: '最多添加三项',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({
+      [`form.${type}`]: this.data.form[type].concat(createMetricRow())
+    })
+  },
+
+  updateMetricUnit(e) {
+    const type = e.currentTarget.dataset.type
+    const index = Number(e.currentTarget.dataset.index)
+    const unitIndex = Number(e.detail.value)
+    this.setData({
+      [`form.${type}[${index}].unitIndex`]: unitIndex,
+      [`form.${type}[${index}].unit`]: this.data.unitOptions[unitIndex]
+    })
+  },
+
+  removeMetricRow(e) {
+    const type = e.currentTarget.dataset.type
+    const index = Number(e.currentTarget.dataset.index)
+    const rows = this.data.form[type].filter((_, rowIndex) => rowIndex !== index)
+    this.setData({
+      [`form.${type}`]: rows.length ? rows : [createMetricRow()]
     })
   },
 
@@ -189,6 +454,7 @@ Page({
         count: 1,
         mediaType: ['image'],
         sourceType: ['album', 'camera'],
+        sizeType: ['compressed'],
         success: (res) => {
           const file = res.tempFiles && res.tempFiles[0]
           if (file && file.tempFilePath) {
@@ -201,6 +467,7 @@ Page({
 
     wx.chooseImage({
       count: 1,
+      sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: (res) => {
         const filePath = res.tempFilePaths && res.tempFilePaths[0]
@@ -219,7 +486,8 @@ Page({
     this.setData({ uploadingImage: true })
 
     try {
-      const result = await api.uploadMenuImage(filePath, imageDesc)
+      const uploadPath = await getSmallerImagePath(filePath)
+      const result = await api.uploadMenuImage(uploadPath, imageDesc)
       this.setData({
         'form.imageUrl': result.image_url
       })
@@ -239,12 +507,26 @@ Page({
     const name = form.name.trim()
     const desc = form.desc.trim()
     const imageUrl = form.imageUrl.trim()
-    const ingredients = form.ingredients.trim()
-    const nutrition = form.nutrition.trim()
 
-    if (!name || !desc || !imageUrl || !ingredients || !nutrition) {
+    if (!name || !desc || !imageUrl) {
       wx.showToast({
         title: '请填写完整',
+        icon: 'none'
+      })
+      return
+    }
+
+    if (!hasCompleteRows(form.ingredients) || hasPartialRows(form.ingredients)) {
+      wx.showToast({
+        title: '请完善食材',
+        icon: 'none'
+      })
+      return
+    }
+
+    if (!hasCompleteRows(form.nutrition) || hasPartialRows(form.nutrition)) {
+      wx.showToast({
+        title: '请完善营养',
         icon: 'none'
       })
       return
@@ -254,15 +536,21 @@ Page({
 
     try {
       this.ensureAdminAuth()
-      await api.uploadMenuItem({
+      const payload = {
         name,
         desc,
         image_url: imageUrl,
-        ingredients: toJsonObjectText(ingredients),
-        nutrition: toJsonObjectText(nutrition)
-      })
+        ingredients: rowsToJsonObjectText(form.ingredients),
+        nutrition: rowsToJsonObjectText(form.nutrition)
+      }
+      if (this.data.editingMenuId) {
+        payload.id = this.data.editingMenuId
+        await api.updateMenuItem(payload)
+      } else {
+        await api.uploadMenuItem(payload)
+      }
       wx.showToast({
-        title: '已保存',
+        title: this.data.editingMenuId ? '已更新' : '已保存',
         icon: 'success'
       })
       this.resetForm()

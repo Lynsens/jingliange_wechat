@@ -49,6 +49,7 @@ const fallbackActivities = [
 ]
 
 const colors = ['green', 'pink', 'gold']
+const MAX_DETAIL_ITEMS = 3
 
 function toArray(value) {
   if (Array.isArray(value)) {
@@ -79,7 +80,7 @@ function toArray(value) {
 
 function toDisplayList(value, fallback) {
   const items = toArray(value)
-  return items.length ? items : fallback
+  return (items.length ? items : fallback).slice(0, MAX_DETAIL_ITEMS)
 }
 
 function formatNutrition(value) {
@@ -138,8 +139,20 @@ function normalizeImageUrl(url) {
     return ''
   }
 
-  if (/^https?:\/\//.test(url)) {
+  if (url.indexOf('http://49.234.22.169:8000/') === 0) {
+    return url.replace('http://49.234.22.169:8000', getApiOrigin())
+  }
+
+  if (url.indexOf('/uploads/') === 0) {
+    return `${getApiOrigin()}${url}`
+  }
+
+  if (/^https:\/\//.test(url)) {
     return url
+  }
+
+  if (/^http:\/\//.test(url)) {
+    return ''
   }
 
   return `${getApiOrigin()}${url.startsWith('/') ? url : `/${url}`}`

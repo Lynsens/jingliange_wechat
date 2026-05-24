@@ -1,7 +1,7 @@
 <view class="admin-page">
   <view class="admin-hero">
     <text class="admin-kicker">净莲阁</text>
-    <text class="admin-desc">{{adminAuthed ? '当前支持素食菜单新增与删除。关于、活动编辑需要后端增加接口后接入。' : '请输入管理员账号和密码后继续。'}}</text>
+    <text class="admin-desc">{{adminAuthed ? '当前支持素食菜单新增、编辑与删除。关于、活动编辑需要后端增加接口后接入。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 
   <view wx:if="{{!adminAuthed}}" class="panel login-panel">
@@ -22,14 +22,64 @@
       bindinput="onAdminPasswordInput"
     />
     <button class="primary-btn" bindtap="loginAdmin">登录</button>
-    <text class="login-note">登录后可新增和删除素食菜单。</text>
+    <text class="login-note">登录后可管理素食菜单。</text>
   </view>
 
   <block wx:else>
-  <view class="panel">
+  <view wx:if="{{!showEditor}}" class="panel">
+    <view class="panel-header menu-panel-header">
+      <text class="panel-title">菜单列表</text>
+      <view class="panel-actions">
+        <button class="ghost-btn" loading="{{loading}}" bindtap="loadMenus">刷新</button>
+        <button class="compact-primary-btn" bindtap="startCreateMenu">新增菜品</button>
+      </view>
+    </view>
+
+    <view class="admin-search">
+      <text class="admin-search-icon">⌕</text>
+      <input
+        class="admin-search-input"
+        placeholder="搜索菜名、介绍或 ID"
+        placeholder-class="placeholder"
+        value="{{menuKeyword}}"
+        bindinput="onMenuKeywordInput"
+      />
+      <view wx:if="{{menuKeyword}}" class="admin-clear-btn" bindtap="clearMenuKeyword">×</view>
+    </view>
+
+    <scroll-view wx:if="{{displayMenus.length > 0}}" class="menu-scroll" scroll-y show-scrollbar="{{false}}">
+      <view class="menu-list">
+        <view wx:for="{{displayMenus}}" wx:key="id" class="menu-item">
+          <view class="menu-copy">
+            <text class="menu-name">{{item.name}}</text>
+            <text class="menu-desc">{{item.desc}}</text>
+            <text class="menu-meta">ID {{item.id}} · {{item.likeCount}} 人喜欢</text>
+          </view>
+          <view class="menu-actions">
+            <button class="edit-btn" data-id="{{item.id}}" bindtap="editMenu">编辑</button>
+            <button
+              class="delete-btn"
+              data-id="{{item.id}}"
+              data-name="{{item.name}}"
+              bindtap="deleteMenu"
+            >
+              删除
+            </button>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view wx:else class="empty-card">
+      <text class="empty-title">{{loading ? '正在加载菜单' : (menuKeyword ? '没有找到菜单' : '暂无菜单')}}</text>
+      <text class="empty-desc">{{menuKeyword ? '换一个关键词再试。' : '点击新增菜品后会出现在这里。'}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{showEditor && formReady}}" class="panel">
     <view class="panel-header">
-      <text class="panel-title">新增素食</text>
-      <button class="ghost-btn" bindtap="resetForm">清空</button>
+      <text class="panel-title">{{editingMenuId ? '编辑素食' : '新增素食'}}</text>
+      <button class="ghost-btn" bindtap="resetForm">取消</button>
     </view>
 
     <input
@@ -58,56 +108,108 @@
         <button class="ghost-btn image-btn" loading="{{uploadingImage}}" bindtap="chooseMenuImage">选择图片</button>
       </view>
     </view>
-    <text class="field-label">所含食材</text>
-    <textarea
-      class="textarea small"
-      placeholder="每行一个：豆腐: 100g"
-      placeholder-class="placeholder"
-      value="{{form.ingredients}}"
-      data-field="ingredients"
-      bindinput="updateField"
-    />
-    <text class="field-label">营养详情</text>
-    <textarea
-      class="textarea small"
-      placeholder="每行一个：蛋白质: 10g"
-      placeholder-class="placeholder"
-      value="{{form.nutrition}}"
-      data-field="nutrition"
-      bindinput="updateField"
-    />
-
-    <button class="primary-btn" loading="{{saving}}" bindtap="submitMenu">保存菜品</button>
-  </view>
-
-  <view class="panel">
-    <view class="panel-header">
-      <text class="panel-title">菜单列表</text>
-      <button class="ghost-btn" loading="{{loading}}" bindtap="loadMenus">刷新</button>
-    </view>
-
-    <view wx:if="{{menus.length > 0}}" class="menu-list">
-      <view wx:for="{{menus}}" wx:key="id" class="menu-item">
-        <view class="menu-copy">
-          <text class="menu-name">{{item.name}}</text>
-          <text class="menu-desc">{{item.desc}}</text>
-          <text class="menu-meta">ID {{item.id}} · {{item.likeCount}} 人喜欢</text>
-        </view>
+    <text class="field-label">主要食材</text>
+    <view class="metric-list">
+      <view class="metric-header">
+        <text>名称</text>
+        <text>数量</text>
+        <text>单位</text>
+      </view>
+      <view class="metric-row" wx:for="{{form.ingredients}}" wx:key="id">
+        <input
+          class="metric-input name-input"
+          placeholder="豆腐"
+          placeholder-class="placeholder"
+          value="{{item.name}}"
+          data-type="ingredients"
+          data-index="{{index}}"
+          data-field="name"
+          bindinput="updateMetricField"
+        />
+        <input
+          class="metric-input quantity-input"
+          type="digit"
+          placeholder="100"
+          placeholder-class="placeholder"
+          value="{{item.quantity}}"
+          data-type="ingredients"
+          data-index="{{index}}"
+          data-field="quantity"
+          bindinput="updateMetricField"
+        />
+        <picker
+          range="{{unitOptions}}"
+          value="{{item.unitIndex}}"
+          data-type="ingredients"
+          data-index="{{index}}"
+          bindchange="updateMetricUnit"
+        >
+          <view class="metric-picker {{item.unit ? '' : 'metric-picker-empty'}}">{{item.unit || '单位'}}</view>
+        </picker>
         <button
-          class="delete-btn"
-          data-id="{{item.id}}"
-          data-name="{{item.name}}"
-          bindtap="deleteMenu"
+          wx:if="{{form.ingredients.length > 1}}"
+          class="row-remove-btn"
+          data-type="ingredients"
+          data-index="{{index}}"
+          bindtap="removeMetricRow"
         >
           删除
         </button>
       </view>
+      <button wx:if="{{form.ingredients.length < 3}}" class="row-add-btn" data-type="ingredients" bindtap="addMetricRow">添加食材</button>
+    </view>
+    <text class="field-label">营养价值表</text>
+    <view class="metric-list">
+      <view class="metric-header">
+        <text>名称</text>
+        <text>数量</text>
+        <text>单位</text>
+      </view>
+      <view class="metric-row" wx:for="{{form.nutrition}}" wx:key="id">
+        <input
+          class="metric-input name-input"
+          placeholder="蛋白质"
+          placeholder-class="placeholder"
+          value="{{item.name}}"
+          data-type="nutrition"
+          data-index="{{index}}"
+          data-field="name"
+          bindinput="updateMetricField"
+        />
+        <input
+          class="metric-input quantity-input"
+          type="digit"
+          placeholder="10"
+          placeholder-class="placeholder"
+          value="{{item.quantity}}"
+          data-type="nutrition"
+          data-index="{{index}}"
+          data-field="quantity"
+          bindinput="updateMetricField"
+        />
+        <picker
+          range="{{unitOptions}}"
+          value="{{item.unitIndex}}"
+          data-type="nutrition"
+          data-index="{{index}}"
+          bindchange="updateMetricUnit"
+        >
+          <view class="metric-picker {{item.unit ? '' : 'metric-picker-empty'}}">{{item.unit || '单位'}}</view>
+        </picker>
+        <button
+          wx:if="{{form.nutrition.length > 1}}"
+          class="row-remove-btn"
+          data-type="nutrition"
+          data-index="{{index}}"
+          bindtap="removeMetricRow"
+        >
+          删除
+        </button>
+      </view>
+      <button wx:if="{{form.nutrition.length < 3}}" class="row-add-btn" data-type="nutrition" bindtap="addMetricRow">添加营养</button>
     </view>
 
-    <view wx:else class="empty-card">
-      <text class="empty-title">{{loading ? '正在加载菜单' : '暂无菜单'}}</text>
-      <text class="empty-desc">新增素食后会出现在这里。</text>
-    </view>
+    <button class="primary-btn" loading="{{saving}}" bindtap="submitMenu">{{editingMenuId ? '更新菜品' : '保存菜品'}}</button>
   </view>
   <button class="logout-btn" bindtap="logoutAdmin">退出管理</button>
   </block>

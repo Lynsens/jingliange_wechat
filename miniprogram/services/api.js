@@ -13,6 +13,15 @@ function getMenuList(name) {
       page_size: 20,
       page_number: 0
     }
+  }).then((list) => {
+    if (!Array.isArray(list)) {
+      return list
+    }
+
+    return list.map((item) => ({
+      ...item,
+      image_url: normalizeUploadImageUrl(item.image_url)
+    }))
   })
 }
 
@@ -149,6 +158,15 @@ function uploadMenuItem(data) {
   })
 }
 
+function updateMenuItem(data) {
+  return request({
+    admin: true,
+    url: '/updateMenuItem',
+    method: 'PUT',
+    data
+  })
+}
+
 function deleteMenuItem(id) {
   return request({
     admin: true,
@@ -174,5 +192,6 @@ module.exports = {
   adminLogin,
   uploadMenuImage,
   uploadMenuItem,
+  updateMenuItem,
   deleteMenuItem
 }

@@ -1,5 +1,5 @@
 <view class="page">
-  <scroll-view scroll-y class="page-scroll">
+  <scroll-view scroll-y class="page-scroll" show-scrollbar="{{false}}">
     <view class="hero">
       <view class="hero-main">
         <view class="hero-copy">
@@ -105,10 +105,12 @@
             <view class="menu-info">
               <view class="menu-title-row">
                 <text class="menu-name">{{item.name}}</text>
-                <text class="nutrition">{{item.nutrition}}</text>
+                <view class="nutrition-summary">
+                  <text class="nutrition-summary-item" wx:for="{{item.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+                </view>
               </view>
               <text class="menu-desc">{{item.desc}}</text>
-              <text class="detail-label compact-label">所含食材</text>
+              <text class="detail-label compact-label">主要食材</text>
               <view class="tag-row">
                 <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
               </view>
@@ -195,15 +197,15 @@
       <view class="info-grid">
         <view class="info-item">
           <text class="info-label">开放时间</text>
-          <text class="info-value">09:00 - 18:00</text>
+          <text class="info-value">11:00 - 13:00</text>
         </view>
         <view class="info-item">
           <text class="info-label">地址</text>
-          <text class="info-value">净莲阁斋堂</text>
+          <text class="info-value">温州市瓯海区茶山大学城高科路 103 号</text>
         </view>
         <view class="info-item">
           <text class="info-label">联系电话</text>
-          <text class="info-value">待配置</text>
+          <text class="info-value">13868683322</text>
         </view>
       </view>
 
@@ -226,13 +228,14 @@
         <text>{{selectedMenu.likeCount}} 人喜欢</text>
       </view>
       <view class="detail-group">
-        <text class="detail-label">所含食材</text>
+        <text class="detail-label">主要食材</text>
         <view class="tag-row detail-tags">
           <text class="tag" wx:for="{{selectedMenu.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
         </view>
       </view>
       <view class="detail-group">
-        <text class="detail-label">营养详情</text>
+        <text class="detail-label">营养价值表</text>
+        <text class="nutrition-note">营养信息仅供参考，不作为健康建议；每份为 100g/100ml。</text>
         <view class="nutrition-list">
           <text class="nutrition-item" wx:for="{{selectedMenu.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
         </view>
