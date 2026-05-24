@@ -155,57 +155,10 @@
     </view>
 
     <view wx:if="{{activeTab === 'donation'}}" class="section">
-      <view class="donation-panel">
-        <view>
-          <text class="panel-label">本年随喜总额</text>
-          <text class="donation-total">¥{{donationStats.totalAmount}}</text>
-        </view>
-        <view class="count-pill">{{donationStats.totalCount}} 人次</view>
-      </view>
-
-      <view class="form-panel">
-        <text class="form-title">随喜登记</text>
-        <input
-          class="form-input"
-          placeholder="昵称"
-          placeholder-class="form-placeholder"
-          value="{{donationName}}"
-          bindinput="onDonationNameInput"
-        />
-        <input
-          class="form-input stacked"
-          type="digit"
-          placeholder="金额"
-          placeholder-class="form-placeholder"
-          value="{{donationAmount}}"
-          bindinput="onDonationAmountInput"
-        />
-        <textarea
-          class="form-textarea"
-          placeholder="留言"
-          placeholder-class="form-placeholder"
-          value="{{donationMessage}}"
-          bindinput="onDonationMessageInput"
-        />
-        <button class="primary-btn" bindtap="submitDonationPreview">提交</button>
-      </view>
-
-      <view wx:if="{{donations.length > 0}}" class="leaderboard">
-        <view class="leader-item" wx:for="{{donations}}" wx:key="id">
-          <view class="rank">{{index + 1}}</view>
-          <view class="leader-content">
-            <view class="leader-topline">
-              <text class="donor-name">{{item.donorName}}</text>
-              <text class="donor-amount">¥{{item.amount}}</text>
-            </view>
-            <text class="donor-message">{{item.message}}</text>
-            <text class="donor-date">{{item.date}}</text>
-          </view>
-        </view>
-      </view>
-      <view wx:else class="empty-card">
-        <text class="empty-card-title">暂无随喜记录</text>
-        <text class="empty-card-desc">完成随喜登记后，功德榜会显示公开记录。</text>
+      <view class="donation-dev-panel">
+        <text class="donation-dev-kicker">功德榜</text>
+        <text class="donation-dev-title">小程序捐款功能正在开发</text>
+        <text class="donation-dev-copy">目前暂不支持在小程序内提交随喜登记或查看功德榜记录。如需咨询随喜功德相关事宜，请向餐厅前台联系。</text>
       </view>
     </view>
 

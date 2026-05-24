@@ -628,6 +628,41 @@
   padding: 14rpx 20rpx;
 }
 
+.donation-dev-panel {
+  border: 1rpx solid rgba(23, 18, 15, 0.1);
+  border-radius: 14rpx;
+  background: #fffaf6;
+  padding: 36rpx 30rpx;
+}
+
+.donation-dev-kicker,
+.donation-dev-title,
+.donation-dev-copy {
+  display: block;
+}
+
+.donation-dev-kicker {
+  color: #ad693e;
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
+  font-size: 28rpx;
+  line-height: 38rpx;
+}
+
+.donation-dev-title {
+  margin-top: 12rpx;
+  color: #17120f;
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 48rpx;
+}
+
+.donation-dev-copy {
+  margin-top: 16rpx;
+  color: #6f5545;
+  font-size: 26rpx;
+  line-height: 42rpx;
+}
+
 .form-panel {
   margin-top: 18rpx;
   padding: 24rpx;

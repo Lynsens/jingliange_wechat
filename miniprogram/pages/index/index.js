@@ -37,12 +37,6 @@ let allMenus = [
   }
 ]
 
-const fallbackDonations = [
-  { id: 1, donorName: '善心人士', amount: '1,000', message: '愿大众安康', date: '2026.05.18' },
-  { id: 2, donorName: '明心', amount: '500', message: '随喜供养', date: '2026.05.15' },
-  { id: 3, donorName: '莲友', amount: '300', message: '护持素食推广', date: '2026.05.12' }
-]
-
 const fallbackActivities = [
   { id: 1, title: '周末素食共修', time: '周六 10:30', place: '净莲阁斋堂' },
   { id: 2, title: '莲花茶会', time: '周日 14:00', place: '二楼茶室' }
@@ -100,14 +94,6 @@ function formatNutrition(value) {
   }
 
   return value
-}
-
-function formatAmount(value) {
-  const amount = Number(value || 0)
-  return amount.toLocaleString('zh-CN', {
-    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
-    maximumFractionDigits: 2
-  })
 }
 
 function formatDate(value) {
@@ -194,16 +180,6 @@ function sortMenusByLikeCount(menus) {
     }))
 }
 
-function normalizeDonation(item) {
-  return {
-    id: item.id,
-    donorName: item.donor_name || item.donorName || '善心人士',
-    amount: formatAmount(item.amount),
-    message: item.message || '随喜护持',
-    date: formatDate(item.donate_time || item.date || item.create_time)
-  }
-}
-
 function normalizeActivity(item) {
   return {
     id: item.id,
@@ -269,15 +245,12 @@ Page({
     loading: false,
     offlineMode: false,
     backendError: '',
-    aboutDescription: '净莲阁以素食、茶会与公益活动连接同修善友。小程序将承载菜单展示、活动发布、功德榜与随喜登记。',
+    aboutDescription: '净莲阁以素食、茶会与公益活动连接同修善友。小程序将承载菜单展示、活动发布和餐厅信息。',
     featuredMenu: allMenus[0],
     selectedMenu: null,
     detailLoading: false,
     menuComments: [],
     menuCommentText: '',
-    donationName: '',
-    donationAmount: '',
-    donationMessage: '',
     navItems: [
       { key: 'home', title: '首页' },
       { key: 'menu', title: '素食' },
@@ -286,15 +259,10 @@ Page({
     ],
     quickStats: [
       { label: '素食', value: '8' },
-      { label: '随喜人次', value: '236' },
+      { label: '功德榜', value: '开发中' },
       { label: '活动', value: '5' }
     ],
     menus: allMenus,
-    donationStats: {
-      totalAmount: '36,820',
-      totalCount: '236'
-    },
-    donations: fallbackDonations,
     activities: fallbackActivities
   },
 
@@ -307,8 +275,6 @@ Page({
 
     const results = await Promise.all([
       this.loadMenus(),
-      this.loadDonationStats(),
-      this.loadDonations(),
       this.loadAbout(),
       this.loadActivities()
     ])
@@ -339,36 +305,6 @@ Page({
           menus: [],
           featuredMenu: null,
           'quickStats[0].value': '0'
-        })
-      }
-      return { success: true }
-    } catch (e) {
-      return { success: false, message: this.getErrorMessage(e) }
-    }
-  },
-
-  async loadDonationStats() {
-    try {
-      const stats = await api.getDonationStats()
-      this.setData({
-        donationStats: {
-          totalAmount: formatAmount(stats.total_amount),
-          totalCount: formatAmount(stats.total_count)
-        },
-        'quickStats[1].value': formatAmount(stats.total_count)
-      })
-      return { success: true }
-    } catch (e) {
-      return { success: false, message: this.getErrorMessage(e) }
-    }
-  },
-
-  async loadDonations() {
-    try {
-      const list = await api.getDonationList()
-      if (Array.isArray(list)) {
-        this.setData({
-          donations: list.map(normalizeDonation)
         })
       }
       return { success: true }
@@ -559,58 +495,6 @@ Page({
       wx.hideLoading()
       wx.showToast({
         title: e.message || '评论失败',
-        icon: 'none'
-      })
-    }
-  },
-
-  onDonationNameInput(e) {
-    this.setData({ donationName: e.detail.value })
-  },
-
-  onDonationAmountInput(e) {
-    this.setData({ donationAmount: e.detail.value })
-  },
-
-  onDonationMessageInput(e) {
-    this.setData({ donationMessage: e.detail.value })
-  },
-
-  async submitDonationPreview() {
-    const donorName = this.data.donationName.trim()
-    const amount = Number(this.data.donationAmount)
-    const message = this.data.donationMessage.trim()
-
-    if (!donorName) {
-      wx.showToast({ title: '请填写昵称', icon: 'none' })
-      return
-    }
-
-    if (!amount || amount <= 0) {
-      wx.showToast({ title: '请填写金额', icon: 'none' })
-      return
-    }
-
-    try {
-      wx.showLoading({ title: '提交中' })
-      await this.ensureAuth()
-      await api.createDonation({
-        donor_name: donorName,
-        amount,
-        message
-      })
-      wx.hideLoading()
-      wx.showToast({ title: '已提交', icon: 'success' })
-      this.setData({
-        donationName: '',
-        donationAmount: '',
-        donationMessage: ''
-      })
-      await Promise.all([this.loadDonationStats(), this.loadDonations()])
-    } catch (e) {
-      wx.hideLoading()
-      wx.showToast({
-        title: '提交失败，请确认后端已启动',
         icon: 'none'
       })
     }

@@ -1,9 +1,5 @@
 const { request, uploadFile, normalizeUploadImageUrl } = require('../utils/request')
 
-function getCurrentYear() {
-  return new Date().getFullYear()
-}
-
 function getMenuList(name) {
   return request({
     url: '/menu/getMenu',
@@ -57,41 +53,6 @@ function commentMenu(menuId, comment, profile) {
       user_nickname: profile && profile.nickName ? profile.nickName : '',
       user_avatar_url: profile && profile.avatarUrl ? profile.avatarUrl : ''
     }
-  })
-}
-
-function getDonationStats() {
-  return request({
-    url: '/donation/getDonationStats',
-    method: 'POST',
-    data: {
-      year: getCurrentYear(),
-      period: 'all'
-    }
-  })
-}
-
-function getDonationList() {
-  return request({
-    url: '/donation/getDonationList',
-    method: 'POST',
-    data: {
-      year: getCurrentYear(),
-      period: 'all',
-      donor_name: '',
-      sort_by: 'time',
-      sort_order: 'desc',
-      page_size: 10,
-      page_number: 0
-    }
-  })
-}
-
-function createDonation(data) {
-  return request({
-    url: '/donation/createDonation',
-    method: 'POST',
-    data
   })
 }
 
@@ -310,9 +271,6 @@ module.exports = {
   likeMenu,
   getMenuComments,
   commentMenu,
-  getDonationStats,
-  getDonationList,
-  createDonation,
   getDescription,
   getActivityList,
   login,
