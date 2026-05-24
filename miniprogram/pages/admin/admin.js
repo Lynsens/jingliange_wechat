@@ -6,6 +6,11 @@ const UNIT_OPTIONS = ['g', 'ml']
 const MAX_METRIC_ROWS = 3
 const IMAGE_COMPRESS_QUALITY = 72
 const IMAGE_COMPRESS_WIDTH = 1280
+const ARCHIVE_FILTERS = [
+  { key: 'all', label: '全部' },
+  { key: 'active', label: '上架中' },
+  { key: 'archived', label: '已下架' }
+]
 let rowSeed = 0
 
 function createMetricRow() {
@@ -24,8 +29,20 @@ function createEmptyForm() {
     name: '',
     desc: '',
     imageUrl: '',
+    isRecommended: false,
+    isArchived: false,
     ingredients: [createMetricRow()],
     nutrition: [createMetricRow()]
+  }
+}
+
+function createActivityForm() {
+  return {
+    title: '',
+    eventTime: '',
+    place: '',
+    content: '',
+    isTop: false
   }
 }
 
@@ -86,7 +103,9 @@ function formatMenu(item) {
     imageUrl: item.image_url || '',
     ingredients: item.ingredients || '',
     nutrition: item.nutrition || '',
-    likeCount: item.like_count || 0
+    likeCount: item.like_count || 0,
+    isRecommended: Number(item.is_recommended || 0) === 1,
+    isArchived: Number(item.is_archived || 0) === 1
   }
 }
 
@@ -98,6 +117,28 @@ function filterAdminMenus(menus, keyword) {
 
   return menus.filter((item) => {
     return `${item.id} ${item.name} ${item.desc}`.toLowerCase().indexOf(text) !== -1
+  })
+}
+
+function formatActivity(item) {
+  return {
+    id: item.id,
+    title: item.title || '未命名活动',
+    eventTime: item.event_time || '近期',
+    place: item.place || '净莲阁',
+    content: item.content || '暂无介绍',
+    isTop: Number(item.is_top || 0) === 1
+  }
+}
+
+function filterActivities(activities, keyword) {
+  const text = keyword.trim().toLowerCase()
+  if (!text) {
+    return activities
+  }
+
+  return activities.filter((item) => {
+    return `${item.id} ${item.title} ${item.eventTime} ${item.place} ${item.content}`.toLowerCase().indexOf(text) !== -1
   })
 }
 
@@ -167,14 +208,23 @@ Page({
     loading: false,
     saving: false,
     uploadingImage: false,
+    adminSection: 'menu',
     menuKeyword: '',
+    archiveFilter: 'all',
+    archiveFilters: ARCHIVE_FILTERS,
     unitOptions: UNIT_OPTIONS,
     menus: [],
     displayMenus: [],
     showEditor: false,
     editingMenuId: 0,
     formReady: true,
-    form: createEmptyForm()
+    form: createEmptyForm(),
+    activityKeyword: '',
+    activities: [],
+    displayActivities: [],
+    showActivityEditor: false,
+    editingActivityId: 0,
+    activityForm: createActivityForm()
   },
 
   onLoad() {
@@ -221,8 +271,11 @@ Page({
         adminAuthed: true,
         adminUsername: result.username || username,
         adminPassword: '',
+        adminSection: 'menu',
         showEditor: false,
-        editingMenuId: 0
+        editingMenuId: 0,
+        showActivityEditor: false,
+        editingActivityId: 0
       })
       await this.loadMenus()
       wx.hideLoading()
@@ -241,12 +294,20 @@ Page({
     this.setData({
       adminAuthed: false,
       adminPassword: '',
+      adminSection: 'menu',
       menuKeyword: '',
+      archiveFilter: 'all',
       menus: [],
       displayMenus: [],
       showEditor: false,
       editingMenuId: 0,
-      form: createEmptyForm()
+      form: createEmptyForm(),
+      activityKeyword: '',
+      activities: [],
+      displayActivities: [],
+      showActivityEditor: false,
+      editingActivityId: 0,
+      activityForm: createActivityForm()
     })
   },
 
@@ -280,7 +341,7 @@ Page({
   async loadMenus() {
     this.setData({ loading: true })
     try {
-      const list = await api.getMenuList('')
+      const list = await api.adminGetMenuList('', this.data.archiveFilter)
       const menus = Array.isArray(list) ? list.map(formatMenu) : []
       this.setData({
         menus,
@@ -296,6 +357,40 @@ Page({
     }
   },
 
+  async loadActivities() {
+    this.setData({ loading: true })
+    try {
+      const list = await api.adminGetActivityList('')
+      const activities = Array.isArray(list) ? list.map(formatActivity) : []
+      this.setData({
+        activities,
+        displayActivities: filterActivities(activities, this.data.activityKeyword),
+        loading: false
+      })
+    } catch (e) {
+      this.setData({ loading: false })
+      wx.showToast({
+        title: '活动加载失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  switchAdminSection(e) {
+    const adminSection = e.currentTarget.dataset.section
+    this.setData({
+      adminSection,
+      showEditor: false,
+      showActivityEditor: false,
+      editingMenuId: 0,
+      editingActivityId: 0
+    })
+
+    if (adminSection === 'activity' && this.data.activities.length === 0) {
+      this.loadActivities()
+    }
+  },
+
   onMenuKeywordInput(e) {
     const menuKeyword = e.detail.value
     this.setData({
@@ -304,10 +399,33 @@ Page({
     })
   },
 
+  onArchiveFilterTap(e) {
+    const archiveFilter = e.currentTarget.dataset.filter
+    this.setData({
+      archiveFilter
+    })
+    this.loadMenus()
+  },
+
   clearMenuKeyword() {
     this.setData({
       menuKeyword: '',
       displayMenus: this.data.menus
+    })
+  },
+
+  onActivityKeywordInput(e) {
+    const activityKeyword = e.detail.value
+    this.setData({
+      activityKeyword,
+      displayActivities: filterActivities(this.data.activities, activityKeyword)
+    })
+  },
+
+  clearActivityKeyword() {
+    this.setData({
+      activityKeyword: '',
+      displayActivities: this.data.activities
     })
   },
 
@@ -381,6 +499,8 @@ Page({
           name: menu.name,
           desc: menu.desc,
           imageUrl: menu.imageUrl,
+          isRecommended: menu.isRecommended,
+          isArchived: menu.isArchived,
           ingredients: parseMetricRows(menu.ingredients),
           nutrition: parseMetricRows(menu.nutrition)
         },
@@ -397,6 +517,20 @@ Page({
 
   cancelEdit() {
     this.resetForm()
+  },
+
+  onMenuRecommendedChange(e) {
+    this.setData({
+      'form.isRecommended': e.detail.value
+    })
+  },
+
+  onMenuArchivedChange(e) {
+    const isArchived = e.detail.value
+    this.setData({
+      'form.isArchived': isArchived,
+      'form.isRecommended': isArchived ? false : this.data.form.isRecommended
+    })
   },
 
   updateMetricField(e) {
@@ -541,7 +675,9 @@ Page({
         desc,
         image_url: imageUrl,
         ingredients: rowsToJsonObjectText(form.ingredients),
-        nutrition: rowsToJsonObjectText(form.nutrition)
+        nutrition: rowsToJsonObjectText(form.nutrition),
+        is_recommended: form.isRecommended && !form.isArchived ? 1 : 0,
+        is_archived: form.isArchived ? 1 : 0
       }
       if (this.data.editingMenuId) {
         payload.id = this.data.editingMenuId
@@ -560,6 +696,73 @@ Page({
     } finally {
       this.setData({ saving: false })
     }
+  },
+
+  setRecommendedMenu(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const name = e.currentTarget.dataset.name
+    const isRecommended = Number(e.currentTarget.dataset.recommended) === 1
+    const isArchived = Number(e.currentTarget.dataset.archived) === 1
+
+    if (isArchived && !isRecommended) {
+      wx.showToast({
+        title: '已下架菜品不能推荐',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.showModal({
+      title: isRecommended ? '取消推荐' : '今日推荐',
+      content: isRecommended ? `取消「${name}」的今日推荐？` : `将「${name}」设为今日推荐？`,
+      confirmColor: '#ad693e',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        try {
+          this.ensureAdminAuth()
+          await api.recommendMenuItem(id, !isRecommended)
+          wx.showToast({
+            title: isRecommended ? '已取消' : '已推荐',
+            icon: 'success'
+          })
+          await this.loadMenus()
+        } catch (err) {
+          this.handleAdminRequestError(err, '设置失败')
+        }
+      }
+    })
+  },
+
+  archiveMenu(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const name = e.currentTarget.dataset.name
+    const isArchived = Number(e.currentTarget.dataset.archived) === 1
+
+    wx.showModal({
+      title: isArchived ? '重新上架' : '下架菜品',
+      content: isArchived ? `确认重新上架「${name}」？` : `确认下架「${name}」？下架后用户端不会显示。`,
+      confirmColor: '#ad693e',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        try {
+          this.ensureAdminAuth()
+          await api.archiveMenuItem(id, !isArchived)
+          wx.showToast({
+            title: isArchived ? '已上架' : '已下架',
+            icon: 'success'
+          })
+          await this.loadMenus()
+        } catch (err) {
+          this.handleAdminRequestError(err, '操作失败')
+        }
+      }
+    })
   },
 
   deleteMenu(e) {
@@ -588,5 +791,164 @@ Page({
         }
       }
     })
+  },
+
+  startCreateActivity() {
+    this.setData({
+      showActivityEditor: true,
+      editingActivityId: 0,
+      activityForm: createActivityForm()
+    })
+    if (wx.pageScrollTo) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 200
+      })
+    }
+  },
+
+  editActivity(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const activity = this.data.activities.find((item) => item.id === id)
+    if (!activity) {
+      wx.showToast({
+        title: '活动不存在',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({
+      showActivityEditor: true,
+      editingActivityId: id,
+      activityForm: {
+        title: activity.title,
+        eventTime: activity.eventTime,
+        place: activity.place,
+        content: activity.content,
+        isTop: activity.isTop
+      }
+    })
+    if (wx.pageScrollTo) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 200
+      })
+    }
+  },
+
+  resetActivityForm() {
+    this.setData({
+      showActivityEditor: false,
+      editingActivityId: 0,
+      activityForm: createActivityForm()
+    })
+  },
+
+  updateActivityField(e) {
+    const field = e.currentTarget.dataset.field
+    this.setData({
+      [`activityForm.${field}`]: e.detail.value
+    })
+  },
+
+  onActivityTopChange(e) {
+    this.setData({
+      'activityForm.isTop': e.detail.value
+    })
+  },
+
+  async submitActivity() {
+    const form = this.data.activityForm
+    const title = form.title.trim()
+    const eventTime = form.eventTime.trim()
+    const place = form.place.trim()
+    const content = form.content.trim()
+
+    if (!title || !eventTime || !place || !content) {
+      wx.showToast({
+        title: '请填写完整活动',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({ saving: true })
+
+    try {
+      this.ensureAdminAuth()
+      const payload = {
+        title,
+        event_time: eventTime,
+        place,
+        content,
+        is_top: form.isTop ? 1 : 0
+      }
+
+      if (this.data.editingActivityId) {
+        payload.id = this.data.editingActivityId
+        await api.updateActivity(payload)
+      } else {
+        await api.createActivity(payload)
+      }
+
+      wx.showToast({
+        title: this.data.editingActivityId ? '已更新' : '已保存',
+        icon: 'success'
+      })
+      this.resetActivityForm()
+      await this.loadActivities()
+    } catch (e) {
+      this.handleAdminRequestError(e, '保存失败')
+    } finally {
+      this.setData({ saving: false })
+    }
+  },
+
+  toggleActivityTop(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const isTop = Number(e.currentTarget.dataset.top) === 1
+
+    this.runActivityAction(async () => {
+      await api.topActivity(id, !isTop)
+      wx.showToast({
+        title: isTop ? '已取消置顶' : '已置顶',
+        icon: 'success'
+      })
+    }, '设置失败')
+  },
+
+  deleteActivity(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const title = e.currentTarget.dataset.title
+
+    wx.showModal({
+      title: '删除活动',
+      content: `确认删除「${title}」？`,
+      confirmColor: '#ad693e',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        this.runActivityAction(async () => {
+          await api.deleteActivity(id)
+          wx.showToast({
+            title: '已删除',
+            icon: 'success'
+          })
+        }, '删除失败')
+      }
+    })
+  },
+
+  async runActivityAction(action, fallbackMessage) {
+    try {
+      this.ensureAdminAuth()
+      await action()
+      await this.loadActivities()
+    } catch (err) {
+      this.handleAdminRequestError(err, fallbackMessage)
+    }
   }
 })

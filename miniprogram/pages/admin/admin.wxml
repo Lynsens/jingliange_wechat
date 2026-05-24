@@ -1,7 +1,7 @@
 <view class="admin-page">
   <view class="admin-hero">
     <text class="admin-kicker">净莲阁</text>
-    <text class="admin-desc">{{adminAuthed ? '当前支持素食菜单新增、编辑与删除。关于、活动编辑需要后端增加接口后接入。' : '请输入管理员账号和密码后继续。'}}</text>
+    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、今日推荐、下架菜品与近期活动。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 
   <view wx:if="{{!adminAuthed}}" class="panel login-panel">
@@ -26,7 +26,12 @@
   </view>
 
   <block wx:else>
-  <view wx:if="{{!showEditor}}" class="panel">
+  <view class="admin-tabs">
+    <view class="admin-tab {{adminSection === 'menu' ? 'admin-tab-active' : ''}}" data-section="menu" bindtap="switchAdminSection">菜单管理</view>
+    <view class="admin-tab {{adminSection === 'activity' ? 'admin-tab-active' : ''}}" data-section="activity" bindtap="switchAdminSection">活动管理</view>
+  </view>
+
+  <view wx:if="{{adminSection === 'menu' && !showEditor}}" class="panel">
     <view class="panel-header menu-panel-header">
       <text class="panel-title">菜单列表</text>
       <view class="panel-actions">
@@ -47,16 +52,51 @@
       <view wx:if="{{menuKeyword}}" class="admin-clear-btn" bindtap="clearMenuKeyword">×</view>
     </view>
 
+    <view class="filter-tabs">
+      <view
+        wx:for="{{archiveFilters}}"
+        wx:key="key"
+        class="filter-tab {{archiveFilter === item.key ? 'filter-tab-active' : ''}}"
+        data-filter="{{item.key}}"
+        bindtap="onArchiveFilterTap"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
     <scroll-view wx:if="{{displayMenus.length > 0}}" class="menu-scroll" scroll-y show-scrollbar="{{false}}">
       <view class="menu-list">
-        <view wx:for="{{displayMenus}}" wx:key="id" class="menu-item">
+        <view wx:for="{{displayMenus}}" wx:key="id" class="menu-item {{item.isArchived ? 'menu-item-archived' : ''}}">
           <view class="menu-copy">
+            <view class="status-row">
+              <text wx:if="{{item.isRecommended}}" class="status-pill recommend-pill">今日推荐</text>
+              <text class="status-pill {{item.isArchived ? 'archived-pill' : 'active-pill'}}">{{item.isArchived ? '已下架' : '上架中'}}</text>
+            </view>
             <text class="menu-name">{{item.name}}</text>
             <text class="menu-desc">{{item.desc}}</text>
             <text class="menu-meta">ID {{item.id}} · {{item.likeCount}} 人喜欢</text>
           </view>
           <view class="menu-actions">
             <button class="edit-btn" data-id="{{item.id}}" bindtap="editMenu">编辑</button>
+            <button
+              class="minor-btn"
+              data-id="{{item.id}}"
+              data-name="{{item.name}}"
+              data-recommended="{{item.isRecommended ? 1 : 0}}"
+              data-archived="{{item.isArchived ? 1 : 0}}"
+              bindtap="setRecommendedMenu"
+            >
+              {{item.isRecommended ? '取消推荐' : '推荐'}}
+            </button>
+            <button
+              class="archive-btn"
+              data-id="{{item.id}}"
+              data-name="{{item.name}}"
+              data-archived="{{item.isArchived ? 1 : 0}}"
+              bindtap="archiveMenu"
+            >
+              {{item.isArchived ? '上架' : '下架'}}
+            </button>
             <button
               class="delete-btn"
               data-id="{{item.id}}"
@@ -76,7 +116,7 @@
     </view>
   </view>
 
-  <view wx:if="{{showEditor && formReady}}" class="panel">
+  <view wx:if="{{adminSection === 'menu' && showEditor && formReady}}" class="panel">
     <view class="panel-header">
       <text class="panel-title">{{editingMenuId ? '编辑素食' : '新增素食'}}</text>
       <button class="ghost-btn" bindtap="resetForm">取消</button>
@@ -107,6 +147,20 @@
         <text class="image-url">{{form.imageUrl ? '图片已上传' : '从相册选择或拍照上传'}}</text>
         <button class="ghost-btn image-btn" loading="{{uploadingImage}}" bindtap="chooseMenuImage">选择图片</button>
       </view>
+    </view>
+    <view class="switch-row">
+      <view>
+        <text class="switch-title">今日推荐</text>
+        <text class="switch-desc">同一时间仅一个菜品生效</text>
+      </view>
+      <switch checked="{{form.isRecommended}}" disabled="{{form.isArchived}}" color="#ad693e" bindchange="onMenuRecommendedChange" />
+    </view>
+    <view class="switch-row">
+      <view>
+        <text class="switch-title">下架菜品</text>
+        <text class="switch-desc">下架后用户端不显示</text>
+      </view>
+      <switch checked="{{form.isArchived}}" color="#ad693e" bindchange="onMenuArchivedChange" />
     </view>
     <text class="field-label">主要食材</text>
     <view class="metric-list">
@@ -210,6 +264,101 @@
     </view>
 
     <button class="primary-btn" loading="{{saving}}" bindtap="submitMenu">{{editingMenuId ? '更新菜品' : '保存菜品'}}</button>
+  </view>
+
+  <view wx:if="{{adminSection === 'activity' && !showActivityEditor}}" class="panel">
+    <view class="panel-header menu-panel-header">
+      <text class="panel-title">活动列表</text>
+      <view class="panel-actions">
+        <button class="ghost-btn" loading="{{loading}}" bindtap="loadActivities">刷新</button>
+        <button class="compact-primary-btn" bindtap="startCreateActivity">新增活动</button>
+      </view>
+    </view>
+
+    <view class="admin-search">
+      <text class="admin-search-icon">⌕</text>
+      <input
+        class="admin-search-input"
+        placeholder="搜索活动、地点或 ID"
+        placeholder-class="placeholder"
+        value="{{activityKeyword}}"
+        bindinput="onActivityKeywordInput"
+      />
+      <view wx:if="{{activityKeyword}}" class="admin-clear-btn" bindtap="clearActivityKeyword">×</view>
+    </view>
+
+    <scroll-view wx:if="{{displayActivities.length > 0}}" class="menu-scroll" scroll-y show-scrollbar="{{false}}">
+      <view class="menu-list">
+        <view wx:for="{{displayActivities}}" wx:key="id" class="activity-item">
+          <view class="menu-copy">
+            <view class="status-row">
+              <text wx:if="{{item.isTop}}" class="status-pill recommend-pill">置顶</text>
+              <text class="status-pill active-pill">展示中</text>
+            </view>
+            <text class="menu-name">{{item.title}}</text>
+            <text class="menu-desc">{{item.eventTime}} · {{item.place}}</text>
+            <text class="menu-meta">ID {{item.id}} · {{item.content}}</text>
+          </view>
+          <view class="menu-actions">
+            <button class="edit-btn" data-id="{{item.id}}" bindtap="editActivity">编辑</button>
+            <button class="minor-btn" data-id="{{item.id}}" data-top="{{item.isTop ? 1 : 0}}" bindtap="toggleActivityTop">{{item.isTop ? '取消置顶' : '置顶'}}</button>
+            <button class="delete-btn" data-id="{{item.id}}" data-title="{{item.title}}" bindtap="deleteActivity">删除</button>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view wx:else class="empty-card">
+      <text class="empty-title">{{loading ? '正在加载活动' : (activityKeyword ? '没有找到活动' : '暂无活动')}}</text>
+      <text class="empty-desc">{{activityKeyword ? '换一个关键词再试。' : '点击新增活动后会出现在这里。'}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{adminSection === 'activity' && showActivityEditor}}" class="panel">
+    <view class="panel-header">
+      <text class="panel-title">{{editingActivityId ? '编辑活动' : '新增活动'}}</text>
+      <button class="ghost-btn" bindtap="resetActivityForm">取消</button>
+    </view>
+    <input
+      class="field"
+      placeholder="活动标题"
+      placeholder-class="placeholder"
+      value="{{activityForm.title}}"
+      data-field="title"
+      bindinput="updateActivityField"
+    />
+    <input
+      class="field"
+      placeholder="活动时间，例如 周六 10:30"
+      placeholder-class="placeholder"
+      value="{{activityForm.eventTime}}"
+      data-field="eventTime"
+      bindinput="updateActivityField"
+    />
+    <input
+      class="field"
+      placeholder="活动地点"
+      placeholder-class="placeholder"
+      value="{{activityForm.place}}"
+      data-field="place"
+      bindinput="updateActivityField"
+    />
+    <textarea
+      class="textarea"
+      placeholder="活动介绍"
+      placeholder-class="placeholder"
+      value="{{activityForm.content}}"
+      data-field="content"
+      bindinput="updateActivityField"
+    />
+    <view class="switch-row">
+      <view>
+        <text class="switch-title">首页置顶</text>
+        <text class="switch-desc">置顶活动会优先显示在首页近期活动</text>
+      </view>
+      <switch checked="{{activityForm.isTop}}" color="#ad693e" bindchange="onActivityTopChange" />
+    </view>
+    <button class="primary-btn" loading="{{saving}}" bindtap="submitActivity">{{editingActivityId ? '更新活动' : '保存活动'}}</button>
   </view>
   <button class="logout-btn" bindtap="logoutAdmin">退出管理</button>
   </block>

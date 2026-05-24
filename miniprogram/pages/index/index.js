@@ -172,9 +172,26 @@ function normalizeMenu(item, index) {
     nutritionItems,
     nutrition: nutritionItems.join(' / ') || formatNutrition(item.nutrition),
     likeCount: item.like_count || item.likeCount || 0,
+    isRecommended: Number(item.is_recommended || 0) === 1,
     liked: Boolean(item.liked),
     color: colors[index % colors.length]
   }
+}
+
+function sortMenusByLikeCount(menus) {
+  return menus
+    .slice()
+    .sort((a, b) => {
+      const likeDiff = Number(b.likeCount || 0) - Number(a.likeCount || 0)
+      if (likeDiff !== 0) {
+        return likeDiff
+      }
+
+      return Number(a.id || 0) - Number(b.id || 0)
+    })
+    .map((item, index) => Object.assign({}, item, {
+      color: colors[index % colors.length]
+    }))
 }
 
 function normalizeDonation(item) {
@@ -191,9 +208,14 @@ function normalizeActivity(item) {
   return {
     id: item.id,
     title: item.title || '净莲阁活动',
-    time: formatDate(item.create_time) || '近期',
-    place: item.content || '净莲阁'
+    time: item.event_time || formatDate(item.create_time) || '近期',
+    place: item.place || item.content || '净莲阁',
+    isTop: Number(item.is_top || 0) === 1
   }
+}
+
+function getFeaturedMenu(menus) {
+  return menus.find((item) => item.isRecommended) || menus[0] || null
 }
 
 function normalizeComment(item) {
@@ -273,10 +295,10 @@ Page({
     try {
       const list = await api.getMenuList('')
       if (Array.isArray(list) && list.length) {
-        allMenus = list.map(normalizeMenu)
+        allMenus = sortMenusByLikeCount(list.map(normalizeMenu))
         this.setData({
           menus: this.filterMenus(this.data.keyword),
-          featuredMenu: allMenus[0],
+          featuredMenu: getFeaturedMenu(allMenus),
           'quickStats[0].value': String(allMenus.length)
         })
       } else if (Array.isArray(list)) {
@@ -430,14 +452,14 @@ Page({
       })
     })
 
-    allMenus = allMenus.map((item) => {
+    allMenus = sortMenusByLikeCount(allMenus.map((item) => {
       const updated = menus.find((menu) => menu.id === item.id)
       return updated || item
-    })
+    }))
 
     this.setData({
-      menus,
-      featuredMenu: allMenus[0]
+      menus: this.filterMenus(this.data.keyword),
+      featuredMenu: getFeaturedMenu(allMenus)
     })
   },
 

@@ -149,6 +149,29 @@ function uploadMenuImage(filePath, desc) {
   }))
 }
 
+function adminGetMenuList(keyword, archiveStatus) {
+  return request({
+    admin: true,
+    url: '/menu/list',
+    method: 'POST',
+    data: {
+      keyword: keyword || '',
+      archive_status: archiveStatus || 'all',
+      page_size: 50,
+      page_number: 0
+    }
+  }).then((list) => {
+    if (!Array.isArray(list)) {
+      return list
+    }
+
+    return list.map((item) => ({
+      ...item,
+      image_url: normalizeUploadImageUrl(item.image_url)
+    }))
+  })
+}
+
 function uploadMenuItem(data) {
   return request({
     admin: true,
@@ -167,6 +190,30 @@ function updateMenuItem(data) {
   })
 }
 
+function recommendMenuItem(id, isRecommended) {
+  return request({
+    admin: true,
+    url: '/recommendMenuItem',
+    method: 'PUT',
+    data: {
+      id,
+      is_recommended: isRecommended ? 1 : 0
+    }
+  })
+}
+
+function archiveMenuItem(id, isArchived) {
+  return request({
+    admin: true,
+    url: '/archiveMenuItem',
+    method: 'PUT',
+    data: {
+      id,
+      is_archived: isArchived ? 1 : 0
+    }
+  })
+}
+
 function deleteMenuItem(id) {
   return request({
     admin: true,
@@ -174,6 +221,60 @@ function deleteMenuItem(id) {
     method: 'DELETE',
     data: {
       id
+    }
+  })
+}
+
+function adminGetActivityList(keyword) {
+  return request({
+    admin: true,
+    url: '/activity/list',
+    method: 'POST',
+    data: {
+      keyword: keyword || '',
+      page_size: 50,
+      page_number: 0
+    }
+  })
+}
+
+function createActivity(data) {
+  return request({
+    admin: true,
+    url: '/activity/create',
+    method: 'POST',
+    data
+  })
+}
+
+function updateActivity(data) {
+  return request({
+    admin: true,
+    url: '/activity/update',
+    method: 'PUT',
+    data
+  })
+}
+
+function deleteActivity(id) {
+  return request({
+    admin: true,
+    url: '/activity/delete',
+    method: 'DELETE',
+    data: {
+      id
+    }
+  })
+}
+
+function topActivity(id, isTop) {
+  return request({
+    admin: true,
+    url: '/activity/top',
+    method: 'PUT',
+    data: {
+      id,
+      is_top: isTop ? 1 : 0
     }
   })
 }
@@ -191,7 +292,15 @@ module.exports = {
   login,
   adminLogin,
   uploadMenuImage,
+  adminGetMenuList,
   uploadMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  recommendMenuItem,
+  archiveMenuItem,
+  deleteMenuItem,
+  adminGetActivityList,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  topActivity
 }
