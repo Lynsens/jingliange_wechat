@@ -44,15 +44,28 @@
       </view>
 
       <view wx:if="{{featuredMenu}}" class="featured-menu" data-id="{{featuredMenu.id}}" bindtap="openMenuDetail">
-        <image wx:if="{{featuredMenu.imageUrl}}" src="{{featuredMenu.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
-        <view wx:else class="menu-art menu-art-green">
-          <text>{{featuredMenu.initial}}</text>
+        <view class="featured-hero">
+          <image wx:if="{{featuredMenu.imageUrl}}" src="{{featuredMenu.imageUrl}}" mode="aspectFill" class="featured-photo"></image>
+          <view wx:else class="featured-art menu-art-{{featuredMenu.color}}">
+            <text>{{featuredMenu.initial}}</text>
+          </view>
+          <view class="featured-overlay"></view>
+          <text class="featured-title">{{featuredMenu.name}}</text>
         </view>
         <view class="featured-content">
-          <text class="featured-title">{{featuredMenu.name}}</text>
           <text class="featured-desc">{{featuredMenu.desc}}</text>
           <view class="tag-row">
             <text class="tag" wx:for="{{featuredMenu.ingredients}}" wx:key="*this">{{item}}</text>
+          </view>
+          <view class="featured-bottom">
+            <text class="featured-nutrition">{{featuredMenu.nutrition}}</text>
+            <button
+              class="like-btn {{featuredMenu.liked ? 'liked' : ''}}"
+              data-id="{{featuredMenu.id}}"
+              catchtap="toggleLike"
+            >
+              ♥ {{featuredMenu.likeCount}}
+            </button>
           </view>
         </view>
       </view>
@@ -103,26 +116,35 @@
               <text>{{item.initial}}</text>
             </view>
             <view class="menu-info">
-              <view class="menu-title-row">
-                <text class="menu-name">{{item.name}}</text>
-                <view class="nutrition-summary">
-                  <text class="nutrition-summary-item" wx:for="{{item.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+              <view class="menu-headline">
+                <view class="menu-title-block">
+                  <text class="menu-name">{{item.name}}</text>
+                  <text class="menu-desc">{{item.desc}}</text>
                 </view>
-              </view>
-              <text class="menu-desc">{{item.desc}}</text>
-              <text class="detail-label compact-label">主要食材</text>
-              <view class="tag-row">
-                <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
+                <button
+                  class="like-btn menu-like-btn {{item.liked ? 'liked' : ''}}"
+                  data-id="{{item.id}}"
+                  catchtap="toggleLike"
+                >
+                  ♥ {{item.likeCount}}
+                </button>
               </view>
             </view>
           </view>
-          <button
-            class="like-btn {{item.liked ? 'liked' : ''}}"
-            data-id="{{item.id}}"
-            bindtap="toggleLike"
-          >
-            ♥ {{item.likeCount}}
-          </button>
+          <view class="menu-card-details">
+            <view class="menu-detail-row">
+              <text class="menu-detail-label">主要食材</text>
+              <view class="tag-row menu-detail-tags">
+                <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
+              </view>
+            </view>
+            <view class="menu-detail-row">
+              <text class="menu-detail-label">营养价值</text>
+              <view class="nutrition-chip-row">
+                <text class="nutrition-summary-item" wx:for="{{item.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
 
@@ -249,10 +271,11 @@
         <view wx:elif="{{menuComments.length === 0}}" class="comment-empty">暂无评论</view>
         <view wx:else class="comment-list">
           <view class="comment-item" wx:for="{{menuComments}}" wx:key="id">
-            <view class="comment-avatar">{{item.avatar}}</view>
+            <image wx:if="{{item.avatarUrl}}" class="comment-avatar-img" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+            <view wx:else class="comment-avatar">{{item.avatar}}</view>
             <view class="comment-body">
               <view class="comment-topline">
-                <text class="comment-user">{{item.userId}}</text>
+                <text class="comment-user">{{item.userName}}</text>
                 <text class="comment-date">{{item.date}}</text>
               </view>
               <text class="comment-text">{{item.comment}}</text>

@@ -15,7 +15,7 @@ let allMenus = [
   },
   {
     id: 2,
-    initial: '汤',
+    initial: '莲',
     name: '山药百合汤',
     desc: '山药、百合与莲子慢煮，汤色清亮，适合作为午后轻食。',
     ingredients: ['山药', '百合', '莲子'],
@@ -26,7 +26,7 @@ let allMenus = [
   },
   {
     id: 3,
-    initial: '藕',
+    initial: '莲',
     name: '桂花莲藕羹',
     desc: '莲藕细磨成羹，以少量桂花提香，甜度克制。',
     ingredients: ['莲藕', '桂花', '红枣'],
@@ -164,7 +164,7 @@ function normalizeMenu(item, index) {
   const nutritionItems = toDisplayList(item.nutrition, ['清淡素食'])
   return {
     id: item.id,
-    initial: name.slice(0, 1),
+    initial: '莲',
     name,
     desc: item.desc || '暂无介绍',
     imageUrl: normalizeImageUrl(item.image_url),
@@ -219,14 +219,46 @@ function getFeaturedMenu(menus) {
 }
 
 function normalizeComment(item) {
-  const userId = item.user_id || '莲友'
+  const userName = item.user_nickname || '莲友'
   return {
     id: item.id,
-    userId,
-    avatar: userId.slice(0, 1),
+    userName,
+    avatar: '莲',
+    avatarUrl: normalizeImageUrl(item.user_avatar_url),
     comment: item.comment || '随喜赞叹',
     date: formatDate(item.create_time)
   }
+}
+
+function getWechatCommentProfile() {
+  return new Promise((resolve, reject) => {
+    if (!wx.getUserProfile) {
+      reject(new Error('当前微信版本不支持获取用户信息'))
+      return
+    }
+
+    wx.getUserProfile({
+      desc: '用于展示评论头像和昵称',
+      lang: 'zh_CN',
+      success(res) {
+        const userInfo = res.userInfo || {}
+        const nickName = String(userInfo.nickName || '').trim()
+        const avatarUrl = normalizeImageUrl(userInfo.avatarUrl || '')
+        if (!nickName || !avatarUrl) {
+          reject(new Error('未获取到微信头像昵称'))
+          return
+        }
+
+        resolve({
+          nickName,
+          avatarUrl
+        })
+      },
+      fail(err) {
+        reject(err)
+      }
+    })
+  })
 }
 
 Page({
@@ -512,9 +544,10 @@ Page({
     }
 
     try {
-      wx.showLoading({ title: '提交中' })
+      const profile = await getWechatCommentProfile()
       await this.ensureAuth()
-      await api.commentMenu(selectedMenu.id, comment)
+      wx.showLoading({ title: '提交中' })
+      await api.commentMenu(selectedMenu.id, comment, profile)
       const comments = await api.getMenuComments(selectedMenu.id)
       wx.hideLoading()
       this.setData({
@@ -525,7 +558,7 @@ Page({
     } catch (e) {
       wx.hideLoading()
       wx.showToast({
-        title: '评论失败',
+        title: e.message || '评论失败',
         icon: 'none'
       })
     }

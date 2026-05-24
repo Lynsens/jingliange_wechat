@@ -81,7 +81,7 @@
 .admin-tab {
   flex: 1;
   height: 68rpx;
-  font-size: 27rpx;
+  font-size: 25rpx;
   font-weight: 700;
 }
 
@@ -432,7 +432,7 @@
 }
 
 .menu-scroll {
-  height: 560rpx;
+  height: 760rpx;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -446,7 +446,8 @@
   padding: 20rpx;
 }
 
-.activity-item {
+.activity-item,
+.comment-item {
   display: flex;
   gap: 18rpx;
   align-items: center;
@@ -493,6 +494,15 @@
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+}
+
+.comment-text {
+  display: block;
+  margin-top: 8rpx;
+  color: #6f5545;
+  font-size: 25rpx;
+  line-height: 36rpx;
+  word-break: break-word;
 }
 
 .status-row {

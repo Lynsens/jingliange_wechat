@@ -1,7 +1,7 @@
 <view class="admin-page">
   <view class="admin-hero">
     <text class="admin-kicker">净莲阁</text>
-    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、今日推荐、下架菜品与近期活动。' : '请输入管理员账号和密码后继续。'}}</text>
+    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、今日推荐、下架菜品、近期活动与用户评论。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 
   <view wx:if="{{!adminAuthed}}" class="panel login-panel">
@@ -29,6 +29,7 @@
   <view class="admin-tabs">
     <view class="admin-tab {{adminSection === 'menu' ? 'admin-tab-active' : ''}}" data-section="menu" bindtap="switchAdminSection">菜单管理</view>
     <view class="admin-tab {{adminSection === 'activity' ? 'admin-tab-active' : ''}}" data-section="activity" bindtap="switchAdminSection">活动管理</view>
+    <view class="admin-tab {{adminSection === 'comment' ? 'admin-tab-active' : ''}}" data-section="comment" bindtap="switchAdminSection">评论管理</view>
   </view>
 
   <view wx:if="{{adminSection === 'menu' && !showEditor}}" class="panel">
@@ -359,6 +360,58 @@
       <switch checked="{{activityForm.isTop}}" color="#ad693e" bindchange="onActivityTopChange" />
     </view>
     <button class="primary-btn" loading="{{saving}}" bindtap="submitActivity">{{editingActivityId ? '更新活动' : '保存活动'}}</button>
+  </view>
+
+  <view wx:if="{{adminSection === 'comment'}}" class="panel">
+    <view class="panel-header menu-panel-header">
+      <text class="panel-title">评论列表</text>
+      <view class="panel-actions">
+        <button class="ghost-btn" loading="{{loading}}" bindtap="loadComments">刷新</button>
+      </view>
+    </view>
+
+    <view class="admin-search">
+      <text class="admin-search-icon">⌕</text>
+      <input
+        class="admin-search-input"
+        placeholder="搜索评论、用户、菜品或 ID"
+        placeholder-class="placeholder"
+        value="{{commentKeyword}}"
+        bindinput="onCommentKeywordInput"
+      />
+      <view wx:if="{{commentKeyword}}" class="admin-clear-btn" bindtap="clearCommentKeyword">×</view>
+    </view>
+
+    <scroll-view wx:if="{{displayComments.length > 0}}" class="menu-scroll" scroll-y show-scrollbar="{{false}}">
+      <view class="menu-list">
+        <view wx:for="{{displayComments}}" wx:key="id" class="comment-item">
+          <view class="menu-copy">
+            <view class="status-row">
+              <text class="status-pill active-pill">评论</text>
+              <text class="status-pill archived-pill">ID {{item.id}}</text>
+            </view>
+            <text class="menu-name">{{item.menuName}}</text>
+            <text class="comment-text">{{item.comment}}</text>
+            <text class="menu-meta">{{item.userName}} · {{item.date}}</text>
+          </view>
+          <view class="menu-actions">
+            <button
+              class="delete-btn"
+              data-id="{{item.id}}"
+              data-menu-name="{{item.menuName}}"
+              bindtap="deleteComment"
+            >
+              删除
+            </button>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view wx:else class="empty-card">
+      <text class="empty-title">{{loading ? '正在加载评论' : (commentKeyword ? '没有找到评论' : '暂无评论')}}</text>
+      <text class="empty-desc">{{commentKeyword ? '换一个关键词再试。' : '用户评论后会出现在这里。'}}</text>
+    </view>
   </view>
   <button class="logout-btn" bindtap="logoutAdmin">退出管理</button>
   </block>

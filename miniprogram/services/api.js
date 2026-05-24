@@ -47,13 +47,15 @@ function getMenuComments(menuId) {
   })
 }
 
-function commentMenu(menuId, comment) {
+function commentMenu(menuId, comment, profile) {
   return request({
     url: '/menu/comment',
     method: 'POST',
     data: {
       menu_id: menuId,
-      comment
+      comment,
+      user_nickname: profile && profile.nickName ? profile.nickName : '',
+      user_avatar_url: profile && profile.avatarUrl ? profile.avatarUrl : ''
     }
   })
 }
@@ -225,6 +227,30 @@ function deleteMenuItem(id) {
   })
 }
 
+function adminGetCommentList(keyword) {
+  return request({
+    admin: true,
+    url: '/comment/list',
+    method: 'POST',
+    data: {
+      keyword: keyword || '',
+      page_size: 50,
+      page_number: 0
+    }
+  })
+}
+
+function deleteComment(id) {
+  return request({
+    admin: true,
+    url: '/comment/delete',
+    method: 'DELETE',
+    data: {
+      id
+    }
+  })
+}
+
 function adminGetActivityList(keyword) {
   return request({
     admin: true,
@@ -298,6 +324,8 @@ module.exports = {
   recommendMenuItem,
   archiveMenuItem,
   deleteMenuItem,
+  adminGetCommentList,
+  deleteComment,
   adminGetActivityList,
   createActivity,
   updateActivity,

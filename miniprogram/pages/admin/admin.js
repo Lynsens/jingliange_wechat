@@ -71,6 +71,10 @@ function hasPartialRows(rows) {
   })
 }
 
+function hasAnyMetricValue(rows) {
+  return rows.some((row) => row.name.trim() || row.quantity.trim() || row.unit.trim())
+}
+
 function parseMetricRows(value) {
   const rows = []
 
@@ -131,6 +135,23 @@ function formatActivity(item) {
   }
 }
 
+function formatAdminDate(value) {
+  if (!value) {
+    return ''
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return String(value).slice(0, 16)
+  }
+
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  return `${month}.${day} ${hour}:${minute}`
+}
+
 function filterActivities(activities, keyword) {
   const text = keyword.trim().toLowerCase()
   if (!text) {
@@ -139,6 +160,31 @@ function filterActivities(activities, keyword) {
 
   return activities.filter((item) => {
     return `${item.id} ${item.title} ${item.eventTime} ${item.place} ${item.content}`.toLowerCase().indexOf(text) !== -1
+  })
+}
+
+function formatComment(item) {
+  const userName = item.user_nickname || item.user_id || '匿名用户'
+  return {
+    id: item.id,
+    menuId: item.menu_id,
+    menuName: item.menu_name || `菜品 ${item.menu_id}`,
+    userId: item.user_id || '匿名用户',
+    userName,
+    avatarUrl: item.user_avatar_url || '',
+    comment: item.comment || '',
+    date: formatAdminDate(item.update_time || item.create_time)
+  }
+}
+
+function filterComments(comments, keyword) {
+  const text = keyword.trim().toLowerCase()
+  if (!text) {
+    return comments
+  }
+
+  return comments.filter((item) => {
+    return `${item.id} ${item.menuId} ${item.menuName} ${item.userId} ${item.userName} ${item.comment}`.toLowerCase().indexOf(text) !== -1
   })
 }
 
@@ -224,7 +270,10 @@ Page({
     displayActivities: [],
     showActivityEditor: false,
     editingActivityId: 0,
-    activityForm: createActivityForm()
+    activityForm: createActivityForm(),
+    commentKeyword: '',
+    comments: [],
+    displayComments: []
   },
 
   onLoad() {
@@ -275,7 +324,8 @@ Page({
         showEditor: false,
         editingMenuId: 0,
         showActivityEditor: false,
-        editingActivityId: 0
+        editingActivityId: 0,
+        commentKeyword: ''
       })
       await this.loadMenus()
       wx.hideLoading()
@@ -307,7 +357,10 @@ Page({
       displayActivities: [],
       showActivityEditor: false,
       editingActivityId: 0,
-      activityForm: createActivityForm()
+      activityForm: createActivityForm(),
+      commentKeyword: '',
+      comments: [],
+      displayComments: []
     })
   },
 
@@ -376,6 +429,25 @@ Page({
     }
   },
 
+  async loadComments() {
+    this.setData({ loading: true })
+    try {
+      const list = await api.adminGetCommentList('')
+      const comments = Array.isArray(list) ? list.map(formatComment) : []
+      this.setData({
+        comments,
+        displayComments: filterComments(comments, this.data.commentKeyword),
+        loading: false
+      })
+    } catch (e) {
+      this.setData({ loading: false })
+      wx.showToast({
+        title: '评论加载失败',
+        icon: 'none'
+      })
+    }
+  },
+
   switchAdminSection(e) {
     const adminSection = e.currentTarget.dataset.section
     this.setData({
@@ -388,6 +460,9 @@ Page({
 
     if (adminSection === 'activity' && this.data.activities.length === 0) {
       this.loadActivities()
+    }
+    if (adminSection === 'comment' && this.data.comments.length === 0) {
+      this.loadComments()
     }
   },
 
@@ -426,6 +501,21 @@ Page({
     this.setData({
       activityKeyword: '',
       displayActivities: this.data.activities
+    })
+  },
+
+  onCommentKeywordInput(e) {
+    const commentKeyword = e.detail.value
+    this.setData({
+      commentKeyword,
+      displayComments: filterComments(this.data.comments, commentKeyword)
+    })
+  },
+
+  clearCommentKeyword() {
+    this.setData({
+      commentKeyword: '',
+      displayComments: this.data.comments
     })
   },
 
@@ -642,15 +732,15 @@ Page({
     const desc = form.desc.trim()
     const imageUrl = form.imageUrl.trim()
 
-    if (!name || !desc || !imageUrl) {
+    if (!name || !desc) {
       wx.showToast({
-        title: '请填写完整',
+        title: '请填写名称和介绍',
         icon: 'none'
       })
       return
     }
 
-    if (!hasCompleteRows(form.ingredients) || hasPartialRows(form.ingredients)) {
+    if (hasAnyMetricValue(form.ingredients) && (!hasCompleteRows(form.ingredients) || hasPartialRows(form.ingredients))) {
       wx.showToast({
         title: '请完善食材',
         icon: 'none'
@@ -658,7 +748,7 @@ Page({
       return
     }
 
-    if (!hasCompleteRows(form.nutrition) || hasPartialRows(form.nutrition)) {
+    if (hasAnyMetricValue(form.nutrition) && (!hasCompleteRows(form.nutrition) || hasPartialRows(form.nutrition))) {
       wx.showToast({
         title: '请完善营养',
         icon: 'none'
@@ -938,6 +1028,34 @@ Page({
             icon: 'success'
           })
         }, '删除失败')
+      }
+    })
+  },
+
+  deleteComment(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const menuName = e.currentTarget.dataset.menuName
+
+    wx.showModal({
+      title: '删除评论',
+      content: `确认删除「${menuName}」下的这条评论？`,
+      confirmColor: '#ad693e',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        try {
+          this.ensureAdminAuth()
+          await api.deleteComment(id)
+          wx.showToast({
+            title: '已删除',
+            icon: 'success'
+          })
+          await this.loadComments()
+        } catch (err) {
+          this.handleAdminRequestError(err, '删除失败')
+        }
       }
     })
   },
