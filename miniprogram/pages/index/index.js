@@ -202,7 +202,8 @@ function normalizeComment(item) {
     avatar: '莲',
     avatarUrl: normalizeImageUrl(item.user_avatar_url),
     comment: item.comment || '随喜赞叹',
-    date: formatDate(item.create_time)
+    date: formatDate(item.create_time),
+    isMine: Boolean(item.is_mine)
   }
 }
 
@@ -249,6 +250,9 @@ Page({
     featuredMenu: allMenus[0],
     selectedMenu: null,
     detailLoading: false,
+    detailDragStartY: 0,
+    detailSheetTranslateY: 0,
+    detailSheetTransition: 'none',
     menuComments: [],
     menuCommentText: '',
     navItems: [
@@ -437,6 +441,9 @@ Page({
     this.setData({
       selectedMenu,
       detailLoading: true,
+      detailDragStartY: 0,
+      detailSheetTranslateY: 0,
+      detailSheetTransition: 'none',
       menuComments: [],
       menuCommentText: ''
     })
@@ -456,11 +463,51 @@ Page({
     this.setData({
       selectedMenu: null,
       menuComments: [],
-      menuCommentText: ''
+      menuCommentText: '',
+      detailDragStartY: 0,
+      detailSheetTranslateY: 0,
+      detailSheetTransition: 'none'
     })
   },
 
   noop() {},
+
+  onSheetDragStart(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch) {
+      return
+    }
+
+    this.setData({
+      detailDragStartY: touch.clientY,
+      detailSheetTransition: 'none'
+    })
+  },
+
+  onSheetDragMove(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch || !this.data.detailDragStartY) {
+      return
+    }
+
+    const distance = Math.max(0, touch.clientY - this.data.detailDragStartY)
+    this.setData({
+      detailSheetTranslateY: Math.min(distance, 220)
+    })
+  },
+
+  onSheetDragEnd() {
+    if (this.data.detailSheetTranslateY >= 72) {
+      this.closeMenuDetail()
+      return
+    }
+
+    this.setData({
+      detailDragStartY: 0,
+      detailSheetTranslateY: 0,
+      detailSheetTransition: 'transform 180ms ease'
+    })
+  },
 
   onMenuCommentInput(e) {
     this.setData({ menuCommentText: e.detail.value })
@@ -498,6 +545,44 @@ Page({
         icon: 'none'
       })
     }
+  },
+
+  deleteOwnComment(e) {
+    const commentId = Number(e.currentTarget.dataset.id)
+    const selectedMenu = this.data.selectedMenu
+    if (!commentId || !selectedMenu) {
+      return
+    }
+
+    wx.showModal({
+      title: '删除评论',
+      content: '确认删除你的这条评论？',
+      confirmText: '删除',
+      confirmColor: '#a04438',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        try {
+          await this.ensureAuth()
+          wx.showLoading({ title: '删除中' })
+          await api.deleteMenuComment(commentId)
+          const comments = await api.getMenuComments(selectedMenu.id)
+          wx.hideLoading()
+          this.setData({
+            menuComments: Array.isArray(comments) ? comments.map(normalizeComment) : []
+          })
+          wx.showToast({ title: '已删除', icon: 'success' })
+        } catch (err) {
+          wx.hideLoading()
+          wx.showToast({
+            title: err.message || '删除失败',
+            icon: 'none'
+          })
+        }
+      }
+    })
   },
 
   async ensureAuth() {

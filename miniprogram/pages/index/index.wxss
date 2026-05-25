@@ -853,6 +853,15 @@
   box-sizing: border-box;
   padding: 18rpx 32rpx 42rpx;
   overflow-y: auto;
+  will-change: transform;
+}
+
+.sheet-drag-zone {
+  height: 112rpx;
+  margin: -18rpx -32rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sheet-handle {
@@ -860,7 +869,7 @@
   height: 8rpx;
   border-radius: 999rpx;
   background: #e2b995;
-  margin: 0 auto 26rpx;
+  margin: 0 auto;
 }
 
 .sheet-art {
@@ -984,15 +993,18 @@
 }
 
 .comment-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18rpx;
   margin-top: 20rpx;
+  max-height: 354rpx;
+  overflow: hidden;
 }
 
 .comment-item {
   display: flex;
   gap: 16rpx;
+}
+
+.comment-item + .comment-item {
+  margin-top: 18rpx;
 }
 
 .comment-avatar {
@@ -1047,6 +1059,22 @@
   color: #6f5545;
   font-size: 25rpx;
   line-height: 36rpx;
+}
+
+.comment-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42rpx;
+  min-width: 72rpx;
+  margin-top: 12rpx;
+  border-radius: 999rpx;
+  background: #f2d0c8;
+  color: #a04438;
+  font-size: 21rpx;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0 16rpx;
 }
 
 .comment-form {

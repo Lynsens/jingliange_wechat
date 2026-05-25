@@ -191,8 +191,20 @@
   </scroll-view>
 
   <view wx:if="{{selectedMenu}}" class="detail-mask" bindtap="closeMenuDetail">
-    <view class="detail-sheet" catchtap="noop">
-      <view class="sheet-handle"></view>
+    <view
+      class="detail-sheet"
+      style="transform: translateY({{detailSheetTranslateY}}px); transition: {{detailSheetTransition}};"
+      catchtap="noop"
+    >
+      <view
+        class="sheet-drag-zone"
+        catchtouchstart="onSheetDragStart"
+        catchtouchmove="onSheetDragMove"
+        catchtouchend="onSheetDragEnd"
+        catchtouchcancel="onSheetDragEnd"
+      >
+        <view class="sheet-handle"></view>
+      </view>
       <image wx:if="{{selectedMenu.imageUrl}}" src="{{selectedMenu.imageUrl}}" mode="aspectFill" class="sheet-photo"></image>
       <view wx:else class="menu-art menu-art-{{selectedMenu.color}} sheet-art">
         <text>{{selectedMenu.initial}}</text>
@@ -222,7 +234,7 @@
         </view>
         <view wx:if="{{detailLoading}}" class="comment-empty">正在加载评论</view>
         <view wx:elif="{{menuComments.length === 0}}" class="comment-empty">暂无评论</view>
-        <view wx:else class="comment-list">
+        <scroll-view wx:else class="comment-list" scroll-y show-scrollbar="{{false}}">
           <view class="comment-item" wx:for="{{menuComments}}" wx:key="id">
             <image wx:if="{{item.avatarUrl}}" class="comment-avatar-img" src="{{item.avatarUrl}}" mode="aspectFill"></image>
             <view wx:else class="comment-avatar">{{item.avatar}}</view>
@@ -232,9 +244,10 @@
                 <text class="comment-date">{{item.date}}</text>
               </view>
               <text class="comment-text">{{item.comment}}</text>
+              <button wx:if="{{item.isMine}}" class="comment-delete" data-id="{{item.id}}" catchtap="deleteOwnComment">删除</button>
             </view>
           </view>
-        </view>
+        </scroll-view>
         <view class="comment-form">
           <input
             class="comment-input"
