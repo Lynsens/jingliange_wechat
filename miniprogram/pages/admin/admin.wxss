@@ -61,8 +61,10 @@
 }
 
 .admin-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   margin-top: 22rpx;
-  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .admin-tab,
@@ -80,10 +82,19 @@
 }
 
 .admin-tab {
-  flex: 1 1 220rpx;
-  height: 68rpx;
+  grid-column: span 2;
+  height: 64rpx;
   font-size: 25rpx;
   font-weight: 700;
+  padding: 0;
+}
+
+.admin-tab:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+
+.admin-tab:nth-child(5) {
+  grid-column: 4 / span 2;
 }
 
 .admin-tab-active,
