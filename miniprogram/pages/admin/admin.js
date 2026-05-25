@@ -69,7 +69,7 @@ function createComboForm() {
     title: '今日推荐',
     description: '按今日菜品推荐更健康、更饱足的取餐方式。',
     isActive: false,
-    menuIds: []
+    menuIds: RECOMMENDATION_SLOTS.map(() => 0)
   }
 }
 
@@ -272,19 +272,40 @@ function filterCombos(combos, keyword) {
   })
 }
 
+function normalizeComboMenuIds(selectedIds) {
+  const ids = Array.isArray(selectedIds) ? selectedIds.slice(0, RECOMMENDATION_SLOTS.length) : []
+  while (ids.length < RECOMMENDATION_SLOTS.length) {
+    ids.push(0)
+  }
+  return ids.map((id) => Number(id) || 0)
+}
+
 function buildComboMenuOptions(menus, selectedIds) {
+  const normalizedIds = normalizeComboMenuIds(selectedIds)
   const selectedSet = {}
-  selectedIds.forEach((id) => {
-    selectedSet[id] = true
+  normalizedIds.forEach((id) => {
+    if (id) {
+      selectedSet[id] = true
+    }
   })
 
-  return menus
-    .filter((item) => !item.isArchived)
-    .map((item) => Object.assign({}, item, {
-      selected: Boolean(selectedSet[item.id]),
-      selectedIndex: selectedIds.indexOf(item.id),
-      slotLabel: selectedSet[item.id] ? RECOMMENDATION_SLOTS[selectedIds.indexOf(item.id)] : ''
-    }))
+  return RECOMMENDATION_SLOTS.map((slotLabel, slotIndex) => {
+    const selectedId = normalizedIds[slotIndex]
+    const options = menus
+      .filter((item) => !item.isArchived && (item.category === slotLabel || item.id === selectedId))
+      .map((item) => Object.assign({}, item, {
+        selected: item.id === selectedId,
+        disabled: Boolean(selectedSet[item.id]) && item.id !== selectedId
+      }))
+
+    return {
+      slotLabel,
+      slotIndex,
+      selectedId,
+      selectedName: selectedId ? ((menus.find((item) => item.id === selectedId) || {}).name || '') : '',
+      options
+    }
+  })
 }
 
 function formatSuggestion(item) {
@@ -1304,7 +1325,7 @@ Page({
         title: combo.title,
         description: combo.description,
         isActive: combo.isActive,
-        menuIds: combo.menuIds.slice(0, 4)
+        menuIds: normalizeComboMenuIds(combo.menuIds)
       },
       comboMenuOptions: buildComboMenuOptions(this.data.menus, combo.menuIds)
     })
@@ -1340,20 +1361,23 @@ Page({
 
   toggleComboMenu(e) {
     const id = Number(e.currentTarget.dataset.id)
-    const current = this.data.comboForm.menuIds.slice()
-    const index = current.indexOf(id)
+    const slotIndex = Number(e.currentTarget.dataset.slotIndex)
+    const current = normalizeComboMenuIds(this.data.comboForm.menuIds)
 
-    if (index >= 0) {
-      current.splice(index, 1)
-    } else {
-      if (current.length >= 4) {
-        wx.showToast({
-          title: '四类各选一道',
-          icon: 'none'
-        })
-        return
+    if (slotIndex < 0 || slotIndex >= RECOMMENDATION_SLOTS.length) {
+      return
+    }
+
+    current.forEach((menuId, index) => {
+      if (menuId === id && index !== slotIndex) {
+        current[index] = 0
       }
-      current.push(id)
+    })
+
+    if (current[slotIndex] === id) {
+      current[slotIndex] = 0
+    } else {
+      current[slotIndex] = id
     }
 
     this.setData({
@@ -1367,7 +1391,9 @@ Page({
     const title = form.title.trim()
     const description = form.description.trim()
 
-    if (!title || form.menuIds.length !== 4) {
+    const menuIds = normalizeComboMenuIds(form.menuIds)
+
+    if (!title || menuIds.some((id) => !id)) {
       wx.showToast({
         title: '请按四类选择 4 道菜',
         icon: 'none'
@@ -1383,7 +1409,7 @@ Page({
         title,
         description,
         is_active: form.isActive ? 1 : 0,
-        menu_ids: form.menuIds
+        menu_ids: menuIds
       }
 
       if (this.data.editingComboId) {

@@ -561,23 +561,71 @@
   color: #7c4a27;
 }
 
+.recommendation-slot-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+
+.recommendation-slot-panel {
+  border-radius: 12rpx;
+  background: #fff7f0;
+  padding: 16rpx;
+}
+
+.recommendation-slot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.recommendation-slot-title,
+.recommendation-slot-selected {
+  display: block;
+}
+
+.recommendation-slot-title {
+  color: #17120f;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 34rpx;
+}
+
+.recommendation-slot-selected {
+  flex: 0 1 auto;
+  max-width: 300rpx;
+  color: #ad693e;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 30rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .combo-menu-picker {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
-  margin-top: 14rpx;
+  gap: 10rpx;
 }
 
 .combo-menu-option {
   border: 1rpx solid rgba(23, 18, 15, 0.08);
   border-radius: 12rpx;
-  background: #fff7f0;
-  padding: 18rpx 20rpx;
+  background: #fffaf6;
+  padding: 16rpx 18rpx;
 }
 
 .combo-menu-option-selected {
   border-color: #ad693e;
   background: #f8dfca;
+}
+
+.combo-menu-option-disabled {
+  opacity: 0.48;
 }
 
 .combo-menu-option-slot {
@@ -611,6 +659,15 @@
   color: #6f5545;
   font-size: 22rpx;
   line-height: 30rpx;
+}
+
+.slot-empty-card {
+  border-radius: 10rpx;
+  background: #fffaf6;
+  color: #a4836e;
+  font-size: 23rpx;
+  line-height: 34rpx;
+  padding: 18rpx;
 }
 
 .status-row {
