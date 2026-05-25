@@ -37,7 +37,7 @@
       </view>
     </scroll-view>
 
-    <view wx:if="{{activeTab === 'home'}}" class="section">
+    <view hidden="{{activeTab !== 'home'}}" class="section">
       <view class="section-header">
         <text class="section-title">今日推荐</text>
       </view>
@@ -96,7 +96,7 @@
       </view>
     </view>
 
-    <view wx:if="{{activeTab === 'menu'}}" class="section">
+    <view hidden="{{activeTab !== 'menu'}}" class="section">
       <view class="search-box">
         <text class="search-icon">⌕</text>
         <input
@@ -166,7 +166,7 @@
       </view>
     </view>
 
-    <view wx:if="{{activeTab === 'donation'}}" class="section">
+    <view hidden="{{activeTab !== 'donation'}}" class="section">
       <view class="donation-dev-panel">
         <text class="donation-dev-kicker">功德榜</text>
         <text class="donation-dev-title">小程序捐款功能正在开发</text>
@@ -174,7 +174,7 @@
       </view>
     </view>
 
-    <view wx:if="{{activeTab === 'suggestion'}}" class="section">
+    <view hidden="{{activeTab !== 'suggestion'}}" class="section">
       <view class="suggestion-panel">
         <text class="suggestion-kicker">建议箱</text>
         <text class="suggestion-title">欢迎留下你的想法</text>
@@ -199,7 +199,7 @@
       </view>
     </view>
 
-    <view wx:if="{{activeTab === 'about'}}" class="section">
+    <view hidden="{{activeTab !== 'about'}}" class="section">
       <view class="about-panel">
         <image class="about-logo" src="../../images/jingliange-logo.jpg" mode="aspectFit"></image>
         <text class="about-title">净莲阁</text>
