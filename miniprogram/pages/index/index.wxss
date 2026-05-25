@@ -535,8 +535,8 @@
   box-sizing: border-box;
   margin: 0;
   border-radius: 999rpx;
-  background: #f8dfca;
-  color: #7c4a27;
+  background: #fff1e8;
+  color: #8b6a57;
   font-size: 25rpx;
   font-weight: 800;
   line-height: 1;
@@ -551,9 +551,9 @@
 }
 
 .like-btn.liked {
-  background: #fff1e8;
-  color: #ad693e;
-  font-weight: 700;
+  background: #ad693e;
+  color: #fffaf6;
+  font-weight: 800;
 }
 
 .menu-like-btn {
