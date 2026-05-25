@@ -11,6 +11,11 @@ const ARCHIVE_FILTERS = [
   { key: 'active', label: '上架中' },
   { key: 'archived', label: '已下架' }
 ]
+const SUGGESTION_FILTERS = [
+  { key: 'all', label: '全部' },
+  { key: 'pending', label: '未处理' },
+  { key: 'handled', label: '已处理' }
+]
 let rowSeed = 0
 
 function createMetricRow() {
@@ -188,6 +193,31 @@ function filterComments(comments, keyword) {
   })
 }
 
+function formatSuggestion(item) {
+  const userName = item.user_nickname || item.user_id || '匿名用户'
+  const handled = Number(item.handle_status || 0) === 1
+  return {
+    id: item.id,
+    userId: item.user_id || '',
+    userName,
+    content: item.content || '',
+    contact: item.contact || '未留联系方式',
+    handled,
+    date: formatAdminDate(item.create_time)
+  }
+}
+
+function filterSuggestions(suggestions, keyword) {
+  const text = keyword.trim().toLowerCase()
+  if (!text) {
+    return suggestions
+  }
+
+  return suggestions.filter((item) => {
+    return `${item.id} ${item.userId} ${item.userName} ${item.content} ${item.contact}`.toLowerCase().indexOf(text) !== -1
+  })
+}
+
 function getFileInfo(filePath) {
   return new Promise((resolve) => {
     if (!wx.getFileInfo || !filePath) {
@@ -273,7 +303,12 @@ Page({
     activityForm: createActivityForm(),
     commentKeyword: '',
     comments: [],
-    displayComments: []
+    displayComments: [],
+    suggestionKeyword: '',
+    suggestionFilter: 'all',
+    suggestionFilters: SUGGESTION_FILTERS,
+    suggestions: [],
+    displaySuggestions: []
   },
 
   onLoad() {
@@ -325,7 +360,8 @@ Page({
         editingMenuId: 0,
         showActivityEditor: false,
         editingActivityId: 0,
-        commentKeyword: ''
+        commentKeyword: '',
+        suggestionKeyword: ''
       })
       await this.loadMenus()
       wx.hideLoading()
@@ -360,7 +396,11 @@ Page({
       activityForm: createActivityForm(),
       commentKeyword: '',
       comments: [],
-      displayComments: []
+      displayComments: [],
+      suggestionKeyword: '',
+      suggestionFilter: 'all',
+      suggestions: [],
+      displaySuggestions: []
     })
   },
 
@@ -448,6 +488,25 @@ Page({
     }
   },
 
+  async loadSuggestions() {
+    this.setData({ loading: true })
+    try {
+      const list = await api.adminGetSuggestionList('', this.data.suggestionFilter)
+      const suggestions = Array.isArray(list) ? list.map(formatSuggestion) : []
+      this.setData({
+        suggestions,
+        displaySuggestions: filterSuggestions(suggestions, this.data.suggestionKeyword),
+        loading: false
+      })
+    } catch (e) {
+      this.setData({ loading: false })
+      wx.showToast({
+        title: '建议加载失败',
+        icon: 'none'
+      })
+    }
+  },
+
   switchAdminSection(e) {
     const adminSection = e.currentTarget.dataset.section
     this.setData({
@@ -463,6 +522,9 @@ Page({
     }
     if (adminSection === 'comment' && this.data.comments.length === 0) {
       this.loadComments()
+    }
+    if (adminSection === 'suggestion' && this.data.suggestions.length === 0) {
+      this.loadSuggestions()
     }
   },
 
@@ -516,6 +578,28 @@ Page({
     this.setData({
       commentKeyword: '',
       displayComments: this.data.comments
+    })
+  },
+
+  onSuggestionKeywordInput(e) {
+    const suggestionKeyword = e.detail.value
+    this.setData({
+      suggestionKeyword,
+      displaySuggestions: filterSuggestions(this.data.suggestions, suggestionKeyword)
+    })
+  },
+
+  onSuggestionFilterTap(e) {
+    this.setData({
+      suggestionFilter: e.currentTarget.dataset.filter
+    })
+    this.loadSuggestions()
+  },
+
+  clearSuggestionKeyword() {
+    this.setData({
+      suggestionKeyword: '',
+      displaySuggestions: this.data.suggestions
     })
   },
 
@@ -1058,6 +1142,23 @@ Page({
         }
       }
     })
+  },
+
+  async toggleSuggestionStatus(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const handled = Number(e.currentTarget.dataset.handled) === 1
+
+    try {
+      this.ensureAdminAuth()
+      await api.updateSuggestionStatus(id, handled ? 0 : 1)
+      wx.showToast({
+        title: handled ? '已标为未处理' : '已处理',
+        icon: 'success'
+      })
+      await this.loadSuggestions()
+    } catch (err) {
+      this.handleAdminRequestError(err, '更新失败')
+    }
   },
 
   async runActivityAction(action, fallbackMessage) {

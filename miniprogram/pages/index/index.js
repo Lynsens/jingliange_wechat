@@ -255,10 +255,14 @@ Page({
     detailSheetTransition: 'none',
     menuComments: [],
     menuCommentText: '',
+    suggestionText: '',
+    suggestionContact: '',
+    submittingSuggestion: false,
     navItems: [
       { key: 'home', title: '首页' },
       { key: 'menu', title: '素食' },
       { key: 'donation', title: '功德榜' },
+      { key: 'suggestion', title: '建议箱' },
       { key: 'about', title: '关于' }
     ],
     quickStats: [
@@ -511,6 +515,47 @@ Page({
 
   onMenuCommentInput(e) {
     this.setData({ menuCommentText: e.detail.value })
+  },
+
+  onSuggestionInput(e) {
+    this.setData({ suggestionText: e.detail.value })
+  },
+
+  onSuggestionContactInput(e) {
+    this.setData({ suggestionContact: e.detail.value })
+  },
+
+  async submitSuggestion() {
+    const content = this.data.suggestionText.trim()
+    const contact = this.data.suggestionContact.trim()
+
+    if (!content) {
+      wx.showToast({ title: '请输入建议内容', icon: 'none' })
+      return
+    }
+
+    if (content.length > 500) {
+      wx.showToast({ title: '建议内容太长', icon: 'none' })
+      return
+    }
+
+    try {
+      this.setData({ submittingSuggestion: true })
+      await this.ensureAuth()
+      await api.createSuggestion(content, contact)
+      this.setData({
+        suggestionText: '',
+        suggestionContact: '',
+        submittingSuggestion: false
+      })
+      wx.showToast({ title: '已收到建议', icon: 'success' })
+    } catch (e) {
+      this.setData({ submittingSuggestion: false })
+      wx.showToast({
+        title: e.message || '提交失败',
+        icon: 'none'
+      })
+    }
   },
 
   async submitMenuComment() {

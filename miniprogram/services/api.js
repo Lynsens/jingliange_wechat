@@ -66,6 +66,19 @@ function deleteMenuComment(commentId) {
   })
 }
 
+function createSuggestion(content, contact, profile) {
+  return request({
+    url: '/suggestion/create',
+    method: 'POST',
+    data: {
+      content,
+      contact: contact || '',
+      user_nickname: profile && profile.nickName ? profile.nickName : '',
+      user_avatar_url: profile && profile.avatarUrl ? profile.avatarUrl : ''
+    }
+  })
+}
+
 function getDescription() {
   return request({
     url: '/about/getDescription',
@@ -276,12 +289,39 @@ function topActivity(id, isTop) {
   })
 }
 
+function adminGetSuggestionList(keyword, handleStatus) {
+  return request({
+    admin: true,
+    url: '/suggestion/list',
+    method: 'POST',
+    data: {
+      keyword: keyword || '',
+      handle_status: handleStatus || 'all',
+      page_size: 50,
+      page_number: 0
+    }
+  })
+}
+
+function updateSuggestionStatus(id, handleStatus) {
+  return request({
+    admin: true,
+    url: '/suggestion/status',
+    method: 'PUT',
+    data: {
+      id,
+      handle_status: handleStatus ? 1 : 0
+    }
+  })
+}
+
 module.exports = {
   getMenuList,
   likeMenu,
   getMenuComments,
   commentMenu,
   deleteMenuComment,
+  createSuggestion,
   getDescription,
   getActivityList,
   login,
@@ -299,5 +339,7 @@ module.exports = {
   createActivity,
   updateActivity,
   deleteActivity,
-  topActivity
+  topActivity,
+  adminGetSuggestionList,
+  updateSuggestionStatus
 }

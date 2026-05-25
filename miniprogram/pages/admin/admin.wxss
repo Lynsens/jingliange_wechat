@@ -62,6 +62,7 @@
 
 .admin-tabs {
   margin-top: 22rpx;
+  flex-wrap: wrap;
 }
 
 .admin-tab,
@@ -79,7 +80,7 @@
 }
 
 .admin-tab {
-  flex: 1;
+  flex: 1 1 220rpx;
   height: 68rpx;
   font-size: 25rpx;
   font-weight: 700;
@@ -447,7 +448,8 @@
 }
 
 .activity-item,
-.comment-item {
+.comment-item,
+.suggestion-item {
   display: flex;
   gap: 18rpx;
   align-items: center;
@@ -502,6 +504,14 @@
   color: #6f5545;
   font-size: 25rpx;
   line-height: 36rpx;
+  word-break: break-word;
+}
+
+.suggestion-content {
+  display: block;
+  color: #17120f;
+  font-size: 26rpx;
+  line-height: 38rpx;
   word-break: break-word;
 }
 

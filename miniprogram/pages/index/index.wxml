@@ -162,6 +162,31 @@
       </view>
     </view>
 
+    <view wx:if="{{activeTab === 'suggestion'}}" class="section">
+      <view class="suggestion-panel">
+        <text class="suggestion-kicker">建议箱</text>
+        <text class="suggestion-title">欢迎留下你的想法</text>
+        <text class="suggestion-copy">菜单、活动、服务或小程序体验都可以告诉我们，管理员会在后台查看。</text>
+        <textarea
+          class="suggestion-textarea"
+          maxlength="500"
+          placeholder="写下你的建议"
+          placeholder-class="placeholder"
+          value="{{suggestionText}}"
+          bindinput="onSuggestionInput"
+        />
+        <input
+          class="suggestion-field"
+          maxlength="64"
+          placeholder="联系方式（选填）"
+          placeholder-class="placeholder"
+          value="{{suggestionContact}}"
+          bindinput="onSuggestionContactInput"
+        />
+        <button class="primary-btn suggestion-submit" loading="{{submittingSuggestion}}" bindtap="submitSuggestion">提交建议</button>
+      </view>
+    </view>
+
     <view wx:if="{{activeTab === 'about'}}" class="section">
       <view class="about-panel">
         <image class="about-logo" src="../../images/jingliange-logo.jpg" mode="aspectFit"></image>

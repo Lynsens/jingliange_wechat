@@ -1,7 +1,7 @@
 <view class="admin-page">
   <view class="admin-hero">
     <text class="admin-kicker">净莲阁</text>
-    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、今日推荐、下架菜品、近期活动与用户评论。' : '请输入管理员账号和密码后继续。'}}</text>
+    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、近期活动、用户评论与建议箱。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 
   <view wx:if="{{!adminAuthed}}" class="panel login-panel">
@@ -30,6 +30,7 @@
     <view class="admin-tab {{adminSection === 'menu' ? 'admin-tab-active' : ''}}" data-section="menu" bindtap="switchAdminSection">菜单管理</view>
     <view class="admin-tab {{adminSection === 'activity' ? 'admin-tab-active' : ''}}" data-section="activity" bindtap="switchAdminSection">活动管理</view>
     <view class="admin-tab {{adminSection === 'comment' ? 'admin-tab-active' : ''}}" data-section="comment" bindtap="switchAdminSection">评论管理</view>
+    <view class="admin-tab {{adminSection === 'suggestion' ? 'admin-tab-active' : ''}}" data-section="suggestion" bindtap="switchAdminSection">建议管理</view>
   </view>
 
   <view wx:if="{{adminSection === 'menu' && !showEditor}}" class="panel">
@@ -411,6 +412,70 @@
     <view wx:else class="empty-card">
       <text class="empty-title">{{loading ? '正在加载评论' : (commentKeyword ? '没有找到评论' : '暂无评论')}}</text>
       <text class="empty-desc">{{commentKeyword ? '换一个关键词再试。' : '用户评论后会出现在这里。'}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{adminSection === 'suggestion'}}" class="panel">
+    <view class="panel-header menu-panel-header">
+      <text class="panel-title">建议列表</text>
+      <view class="panel-actions">
+        <button class="ghost-btn" loading="{{loading}}" bindtap="loadSuggestions">刷新</button>
+      </view>
+    </view>
+
+    <view class="admin-search">
+      <text class="admin-search-icon">⌕</text>
+      <input
+        class="admin-search-input"
+        placeholder="搜索建议、用户或联系方式"
+        placeholder-class="placeholder"
+        value="{{suggestionKeyword}}"
+        bindinput="onSuggestionKeywordInput"
+      />
+      <view wx:if="{{suggestionKeyword}}" class="admin-clear-btn" bindtap="clearSuggestionKeyword">×</view>
+    </view>
+
+    <view class="filter-tabs">
+      <view
+        wx:for="{{suggestionFilters}}"
+        wx:key="key"
+        class="filter-tab {{suggestionFilter === item.key ? 'filter-tab-active' : ''}}"
+        data-filter="{{item.key}}"
+        bindtap="onSuggestionFilterTap"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <scroll-view wx:if="{{displaySuggestions.length > 0}}" class="menu-scroll" scroll-y show-scrollbar="{{false}}">
+      <view class="menu-list">
+        <view wx:for="{{displaySuggestions}}" wx:key="id" class="suggestion-item">
+          <view class="menu-copy">
+            <view class="status-row">
+              <text class="status-pill {{item.handled ? 'active-pill' : 'recommend-pill'}}">{{item.handled ? '已处理' : '未处理'}}</text>
+              <text class="status-pill archived-pill">ID {{item.id}}</text>
+            </view>
+            <text class="suggestion-content">{{item.content}}</text>
+            <text class="menu-meta">{{item.userName}} · {{item.date}}</text>
+            <text class="menu-meta">联系方式：{{item.contact}}</text>
+          </view>
+          <view class="menu-actions">
+            <button
+              class="minor-btn"
+              data-id="{{item.id}}"
+              data-handled="{{item.handled ? 1 : 0}}"
+              bindtap="toggleSuggestionStatus"
+            >
+              {{item.handled ? '未处理' : '已处理'}}
+            </button>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view wx:else class="empty-card">
+      <text class="empty-title">{{loading ? '正在加载建议' : (suggestionKeyword ? '没有找到建议' : '暂无建议')}}</text>
+      <text class="empty-desc">{{suggestionKeyword ? '换一个关键词再试。' : '用户提交建议后会出现在这里。'}}</text>
     </view>
   </view>
   <button class="logout-btn" bindtap="logoutAdmin">退出管理</button>
