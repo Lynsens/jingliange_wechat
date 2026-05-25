@@ -1,5 +1,5 @@
 <view class="page">
-  <scroll-view scroll-y class="page-scroll" show-scrollbar="{{false}}">
+  <scroll-view scroll-y="{{activeTab !== 'home'}}" class="page-scroll {{activeTab === 'home' ? 'home-scroll' : ''}}" show-scrollbar="{{false}}">
     <view class="hero">
       <view class="hero-main">
         <view class="hero-copy">
@@ -78,8 +78,8 @@
         <text class="section-title">近期活动</text>
       </view>
 
-      <view wx:if="{{activities.length > 0}}" class="activity-list">
-        <view class="activity-item" wx:for="{{activities}}" wx:key="id">
+      <view wx:if="{{homeActivities.length > 0}}" class="activity-list">
+        <view class="activity-item" wx:for="{{homeActivities}}" wx:key="id">
           <view class="activity-date">
             <text>{{item.time}}</text>
           </view>
@@ -212,7 +212,7 @@
       <button class="admin-entry" bindtap="openAdmin">内容管理</button>
     </view>
 
-    <view class="bottom-space"></view>
+    <view wx:if="{{activeTab !== 'home'}}" class="bottom-space"></view>
   </scroll-view>
 
   <view wx:if="{{selectedMenu}}" class="detail-mask" bindtap="closeMenuDetail">

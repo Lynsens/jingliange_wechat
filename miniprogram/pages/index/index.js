@@ -271,7 +271,8 @@ Page({
       { label: '活动', value: '5' }
     ],
     menus: allMenus,
-    activities: fallbackActivities
+    activities: fallbackActivities,
+    homeActivities: fallbackActivities.slice(0, 2)
   },
 
   onLoad() {
@@ -337,13 +338,16 @@ Page({
     try {
       const list = await api.getActivityList()
       if (Array.isArray(list) && list.length) {
+        const activities = list.map(normalizeActivity)
         this.setData({
-          activities: list.map(normalizeActivity),
+          activities,
+          homeActivities: activities.slice(0, 2),
           'quickStats[2].value': String(list.length)
         })
       } else if (Array.isArray(list)) {
         this.setData({
           activities: [],
+          homeActivities: [],
           'quickStats[2].value': '0'
         })
       }
