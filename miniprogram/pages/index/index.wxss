@@ -397,9 +397,9 @@
 
 .menu-photo {
   flex: 0 0 auto;
-  width: 118rpx;
-  height: 118rpx;
-  border-radius: 12rpx;
+  width: 148rpx;
+  height: 148rpx;
+  border-radius: 14rpx;
   background: #f5dcc8;
 }
 
@@ -671,13 +671,13 @@
 }
 
 .menu-card {
-  padding: 20rpx 24rpx;
+  padding: 18rpx 24rpx;
 }
 
 .menu-card-main {
   display: flex;
   align-items: flex-start;
-  gap: 20rpx;
+  gap: 18rpx;
 }
 
 .menu-info,
@@ -690,7 +690,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: 14rpx;
 }
 
 .leader-topline {
@@ -701,20 +701,20 @@
 }
 
 .menu-card-details {
-  margin-top: 16rpx;
+  margin-top: 12rpx;
   border-top: 1rpx solid rgba(23, 18, 15, 0.08);
-  padding-top: 14rpx;
+  padding-top: 10rpx;
 }
 
 .menu-detail-row {
   display: grid;
-  grid-template-columns: 126rpx minmax(0, 1fr);
-  gap: 14rpx;
+  grid-template-columns: 118rpx minmax(0, 1fr);
+  gap: 12rpx;
   align-items: start;
 }
 
 .menu-detail-row + .menu-detail-row {
-  margin-top: 10rpx;
+  margin-top: 6rpx;
 }
 
 .menu-detail-label {
@@ -727,6 +727,14 @@
 
 .menu-detail-tags {
   margin-top: 0;
+  gap: 8rpx;
+}
+
+.menu-detail-tags .tag {
+  min-height: 34rpx;
+  font-size: 20rpx;
+  line-height: 34rpx;
+  padding: 0 14rpx;
 }
 
 .nutrition-chip-row {
@@ -739,7 +747,7 @@
 .nutrition-summary-item {
   display: inline-flex;
   align-items: center;
-  min-height: 36rpx;
+  min-height: 34rpx;
   max-width: 190rpx;
   box-sizing: border-box;
   border-radius: 999rpx;
@@ -747,7 +755,7 @@
   color: #ad693e;
   font-size: 20rpx;
   line-height: 1;
-  padding: 0 13rpx;
+  padding: 0 12rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
