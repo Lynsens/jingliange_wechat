@@ -45,6 +45,7 @@ const fallbackActivities = [
 const colors = ['green', 'pink', 'gold']
 const MAX_DETAIL_ITEMS = 3
 const RECOMMENDATION_SLOTS = ['前菜/小菜', '主食', '热食', '甜品/饮品']
+const MENU_CATEGORY_FILTERS = ['全部'].concat(RECOMMENDATION_SLOTS)
 
 function splitIngredientNames(value) {
   return String(value || '')
@@ -295,6 +296,8 @@ Page({
     menuPosition: wx.getMenuButtonBoundingClientRect(),
     activeTab: 'home',
     keyword: '',
+    menuCategoryFilter: '全部',
+    menuCategoryFilters: MENU_CATEGORY_FILTERS,
     loading: false,
     offlineMode: false,
     backendError: '',
@@ -358,7 +361,7 @@ Page({
       if (Array.isArray(list) && list.length) {
         allMenus = sortMenusByLikeCount(list.map(normalizeMenu))
         this.setData({
-          menus: this.filterMenus(this.data.keyword),
+          menus: this.filterMenus(this.data.keyword, this.data.menuCategoryFilter),
           featuredMenu: getFeaturedMenu(allMenus),
           'quickStats[0].value': String(allMenus.length)
         })
@@ -448,25 +451,38 @@ Page({
     const keyword = e.detail.value.trim()
     this.setData({
       keyword,
-      menus: this.filterMenus(keyword)
+      menus: this.filterMenus(keyword, this.data.menuCategoryFilter)
     })
   },
 
   clearSearch() {
     this.setData({
       keyword: '',
-      menus: allMenus
+      menus: this.filterMenus('', this.data.menuCategoryFilter)
     })
   },
 
-  filterMenus(keyword) {
-    if (!keyword) {
-      return allMenus
-    }
+  onMenuCategoryFilterTap(e) {
+    const category = e.currentTarget.dataset.category || '全部'
+    this.setData({
+      menuCategoryFilter: category,
+      menus: this.filterMenus(this.data.keyword, category)
+    })
+  },
 
+  filterMenus(keyword, category) {
+    const textKeyword = String(keyword || '').trim()
+    const categoryFilter = category || '全部'
     return allMenus.filter((item) => {
+      const matchedCategory = categoryFilter === '全部' || item.category === categoryFilter
+      if (!matchedCategory) {
+        return false
+      }
+      if (!textKeyword) {
+        return true
+      }
       const text = `${item.name}${item.category}${item.desc}${item.ingredients.join('')}`
-      return text.indexOf(keyword) > -1
+      return text.indexOf(textKeyword) > -1
     })
   },
 
@@ -529,7 +545,7 @@ Page({
     }
 
     this.setData({
-      menus: this.filterMenus(this.data.keyword),
+      menus: this.filterMenus(this.data.keyword, this.data.menuCategoryFilter),
       featuredMenu: getFeaturedMenu(allMenus),
       comboRecommendation
     })

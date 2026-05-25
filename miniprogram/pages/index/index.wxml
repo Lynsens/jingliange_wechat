@@ -111,6 +111,19 @@
         />
         <button wx:if="{{keyword}}" class="clear-btn" bindtap="clearSearch">×</button>
       </view>
+      <scroll-view scroll-x class="menu-filter-scroll" show-scrollbar="{{false}}">
+        <view class="menu-filter-track">
+          <view
+            wx:for="{{menuCategoryFilters}}"
+            wx:key="*this"
+            class="menu-filter-chip {{menuCategoryFilter === item ? 'menu-filter-chip-active' : ''}}"
+            data-category="{{item}}"
+            bindtap="onMenuCategoryFilterTap"
+          >
+            {{item}}
+          </view>
+        </view>
+      </scroll-view>
 
       <view wx:if="{{menus.length > 0}}" class="menu-list">
         <view class="menu-card" wx:for="{{menus}}" wx:key="id">
@@ -151,8 +164,8 @@
       </view>
 
       <view wx:if="{{menus.length === 0}}" class="empty-state">
-        <text class="empty-title">{{keyword ? '没有找到相关素食' : '暂无素食菜单'}}</text>
-        <text class="empty-desc">{{keyword ? '换一个菜名或食材试试' : '后台添加菜单后，这里会自动展示'}}</text>
+        <text class="empty-title">{{keyword || menuCategoryFilter !== '全部' ? '没有找到相关素食' : '暂无素食菜单'}}</text>
+        <text class="empty-desc">{{keyword || menuCategoryFilter !== '全部' ? '换一个分类或关键词试试' : '后台添加菜单后，这里会自动展示'}}</text>
       </view>
     </view>
 

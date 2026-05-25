@@ -653,6 +653,39 @@
   padding: 0;
 }
 
+.menu-filter-scroll {
+  margin: 14rpx -28rpx 0;
+  white-space: nowrap;
+}
+
+.menu-filter-track {
+  display: inline-flex;
+  gap: 12rpx;
+  padding: 0 28rpx;
+}
+
+.menu-filter-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104rpx;
+  height: 54rpx;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(23, 18, 15, 0.1);
+  border-radius: 999rpx;
+  background: #fffaf6;
+  color: #6f5545;
+  font-size: 23rpx;
+  font-weight: 700;
+  padding: 0 22rpx;
+}
+
+.menu-filter-chip-active {
+  border-color: #ad693e;
+  background: #ad693e;
+  color: #fff;
+}
+
 .menu-list {
   margin-top: 18rpx;
 }
