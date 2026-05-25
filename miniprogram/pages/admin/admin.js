@@ -51,6 +51,15 @@ function createActivityForm() {
   }
 }
 
+function createComboForm() {
+  return {
+    title: '',
+    description: '',
+    isActive: false,
+    menuIds: []
+  }
+}
+
 function rowsToJsonObjectText(rows) {
   const result = {}
   rows.slice(0, MAX_METRIC_ROWS).forEach((row) => {
@@ -193,6 +202,46 @@ function filterComments(comments, keyword) {
   })
 }
 
+function formatCombo(item) {
+  const items = Array.isArray(item.items) ? item.items.map((menu) => ({
+    id: menu.id,
+    name: menu.name || '未命名素食'
+  })) : []
+  return {
+    id: item.id,
+    title: item.title || '未命名套餐',
+    description: item.description || '暂无说明',
+    isActive: Number(item.is_active || 0) === 1,
+    items,
+    menuIds: items.map((menu) => menu.id)
+  }
+}
+
+function filterCombos(combos, keyword) {
+  const text = keyword.trim().toLowerCase()
+  if (!text) {
+    return combos
+  }
+
+  return combos.filter((item) => {
+    const menuText = item.items.map((menu) => menu.name).join(' ')
+    return `${item.id} ${item.title} ${item.description} ${menuText}`.toLowerCase().indexOf(text) !== -1
+  })
+}
+
+function buildComboMenuOptions(menus, selectedIds) {
+  const selectedSet = {}
+  selectedIds.forEach((id) => {
+    selectedSet[id] = true
+  })
+
+  return menus
+    .filter((item) => !item.isArchived)
+    .map((item) => Object.assign({}, item, {
+      selected: Boolean(selectedSet[item.id])
+    }))
+}
+
 function formatSuggestion(item) {
   const userName = item.user_nickname || item.user_id || '匿名用户'
   const handled = Number(item.handle_status || 0) === 1
@@ -301,6 +350,13 @@ Page({
     showActivityEditor: false,
     editingActivityId: 0,
     activityForm: createActivityForm(),
+    comboKeyword: '',
+    combos: [],
+    displayCombos: [],
+    showComboEditor: false,
+    editingComboId: 0,
+    comboForm: createComboForm(),
+    comboMenuOptions: [],
     commentKeyword: '',
     comments: [],
     displayComments: [],
@@ -360,6 +416,9 @@ Page({
         editingMenuId: 0,
         showActivityEditor: false,
         editingActivityId: 0,
+        showComboEditor: false,
+        editingComboId: 0,
+        comboKeyword: '',
         commentKeyword: '',
         suggestionKeyword: ''
       })
@@ -394,6 +453,13 @@ Page({
       showActivityEditor: false,
       editingActivityId: 0,
       activityForm: createActivityForm(),
+      comboKeyword: '',
+      combos: [],
+      displayCombos: [],
+      showComboEditor: false,
+      editingComboId: 0,
+      comboForm: createComboForm(),
+      comboMenuOptions: [],
       commentKeyword: '',
       comments: [],
       displayComments: [],
@@ -439,6 +505,7 @@ Page({
       this.setData({
         menus,
         displayMenus: filterAdminMenus(menus, this.data.menuKeyword),
+        comboMenuOptions: buildComboMenuOptions(menus, this.data.comboForm.menuIds),
         loading: false
       })
     } catch (e) {
@@ -464,6 +531,25 @@ Page({
       this.setData({ loading: false })
       wx.showToast({
         title: '活动加载失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  async loadCombos() {
+    this.setData({ loading: true })
+    try {
+      const list = await api.adminGetComboList('')
+      const combos = Array.isArray(list) ? list.map(formatCombo) : []
+      this.setData({
+        combos,
+        displayCombos: filterCombos(combos, this.data.comboKeyword),
+        loading: false
+      })
+    } catch (e) {
+      this.setData({ loading: false })
+      wx.showToast({
+        title: '套餐加载失败',
         icon: 'none'
       })
     }
@@ -513,12 +599,17 @@ Page({
       adminSection,
       showEditor: false,
       showActivityEditor: false,
+      showComboEditor: false,
       editingMenuId: 0,
-      editingActivityId: 0
+      editingActivityId: 0,
+      editingComboId: 0
     })
 
     if (adminSection === 'activity' && this.data.activities.length === 0) {
       this.loadActivities()
+    }
+    if (adminSection === 'combo' && this.data.combos.length === 0) {
+      this.loadCombos()
     }
     if (adminSection === 'comment' && this.data.comments.length === 0) {
       this.loadComments()
@@ -563,6 +654,21 @@ Page({
     this.setData({
       activityKeyword: '',
       displayActivities: this.data.activities
+    })
+  },
+
+  onComboKeywordInput(e) {
+    const comboKeyword = e.detail.value
+    this.setData({
+      comboKeyword,
+      displayCombos: filterCombos(this.data.combos, comboKeyword)
+    })
+  },
+
+  clearComboKeyword() {
+    this.setData({
+      comboKeyword: '',
+      displayCombos: this.data.combos
     })
   },
 
@@ -1116,6 +1222,178 @@ Page({
     })
   },
 
+  startCreateCombo() {
+    this.setData({
+      showComboEditor: true,
+      editingComboId: 0,
+      comboForm: createComboForm(),
+      comboMenuOptions: buildComboMenuOptions(this.data.menus, [])
+    })
+    if (wx.pageScrollTo) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 200
+      })
+    }
+  },
+
+  editCombo(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const combo = this.data.combos.find((item) => item.id === id)
+    if (!combo) {
+      wx.showToast({
+        title: '套餐不存在',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({
+      showComboEditor: true,
+      editingComboId: id,
+      comboForm: {
+        title: combo.title,
+        description: combo.description,
+        isActive: combo.isActive,
+        menuIds: combo.menuIds.slice(0, 4)
+      },
+      comboMenuOptions: buildComboMenuOptions(this.data.menus, combo.menuIds)
+    })
+    if (wx.pageScrollTo) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 200
+      })
+    }
+  },
+
+  resetComboForm() {
+    this.setData({
+      showComboEditor: false,
+      editingComboId: 0,
+      comboForm: createComboForm(),
+      comboMenuOptions: buildComboMenuOptions(this.data.menus, [])
+    })
+  },
+
+  updateComboField(e) {
+    const field = e.currentTarget.dataset.field
+    this.setData({
+      [`comboForm.${field}`]: e.detail.value
+    })
+  },
+
+  onComboActiveChange(e) {
+    this.setData({
+      'comboForm.isActive': e.detail.value
+    })
+  },
+
+  toggleComboMenu(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const current = this.data.comboForm.menuIds.slice()
+    const index = current.indexOf(id)
+
+    if (index >= 0) {
+      current.splice(index, 1)
+    } else {
+      if (current.length >= 4) {
+        wx.showToast({
+          title: '最多选择 4 道菜',
+          icon: 'none'
+        })
+        return
+      }
+      current.push(id)
+    }
+
+    this.setData({
+      'comboForm.menuIds': current,
+      comboMenuOptions: buildComboMenuOptions(this.data.menus, current)
+    })
+  },
+
+  async submitCombo() {
+    const form = this.data.comboForm
+    const title = form.title.trim()
+    const description = form.description.trim()
+
+    if (!title || !form.menuIds.length) {
+      wx.showToast({
+        title: '请填写套餐并选择菜品',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({ saving: true })
+
+    try {
+      this.ensureAdminAuth()
+      const payload = {
+        title,
+        description,
+        is_active: form.isActive ? 1 : 0,
+        menu_ids: form.menuIds
+      }
+
+      if (this.data.editingComboId) {
+        payload.id = this.data.editingComboId
+        await api.updateCombo(payload)
+      } else {
+        await api.createCombo(payload)
+      }
+
+      wx.showToast({
+        title: this.data.editingComboId ? '已更新' : '已保存',
+        icon: 'success'
+      })
+      this.resetComboForm()
+      await this.loadCombos()
+    } catch (err) {
+      this.handleAdminRequestError(err, '保存失败')
+    } finally {
+      this.setData({ saving: false })
+    }
+  },
+
+  toggleComboActive(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const isActive = Number(e.currentTarget.dataset.active) === 1
+
+    this.runComboAction(async () => {
+      await api.activateCombo(id, !isActive)
+      wx.showToast({
+        title: isActive ? '已取消启用' : '已启用',
+        icon: 'success'
+      })
+    }, '设置失败')
+  },
+
+  deleteCombo(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const title = e.currentTarget.dataset.title
+
+    wx.showModal({
+      title: '删除套餐',
+      content: `确认删除「${title}」？`,
+      confirmColor: '#ad693e',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        this.runComboAction(async () => {
+          await api.deleteCombo(id)
+          wx.showToast({
+            title: '已删除',
+            icon: 'success'
+          })
+        }, '删除失败')
+      }
+    })
+  },
+
   deleteComment(e) {
     const id = Number(e.currentTarget.dataset.id)
     const menuName = e.currentTarget.dataset.menuName
@@ -1166,6 +1444,16 @@ Page({
       this.ensureAdminAuth()
       await action()
       await this.loadActivities()
+    } catch (err) {
+      this.handleAdminRequestError(err, fallbackMessage)
+    }
+  },
+
+  async runComboAction(action, fallbackMessage) {
+    try {
+      this.ensureAdminAuth()
+      await action()
+      await this.loadCombos()
     } catch (err) {
       this.handleAdminRequestError(err, fallbackMessage)
     }

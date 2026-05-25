@@ -39,39 +39,40 @@
 
     <view wx:if="{{activeTab === 'home'}}" class="section">
       <view class="section-header">
-        <text class="section-title">今日推荐</text>
-        <text class="section-subtitle">清淡、均衡、当季</text>
+        <text class="section-title">套餐推荐</text>
+        <text class="section-subtitle">按组合取餐</text>
       </view>
 
-      <view wx:if="{{featuredMenu}}" class="featured-menu" data-id="{{featuredMenu.id}}" bindtap="openMenuDetail">
-        <view class="featured-hero">
-          <image wx:if="{{featuredMenu.imageUrl}}" src="{{featuredMenu.imageUrl}}" mode="aspectFill" class="featured-photo"></image>
-          <view wx:else class="featured-art menu-art-{{featuredMenu.color}}">
-            <text>{{featuredMenu.initial}}</text>
+      <view wx:if="{{comboRecommendation}}" class="combo-card">
+        <view class="combo-head">
+          <view class="combo-title-block">
+            <text class="combo-title">{{comboRecommendation.title}}</text>
+            <text class="combo-desc">{{comboRecommendation.description}}</text>
           </view>
-          <view class="featured-overlay"></view>
-          <text class="featured-title">{{featuredMenu.name}}</text>
+          <text class="combo-count">{{comboRecommendation.items.length}} 道</text>
         </view>
-        <view class="featured-content">
-          <text class="featured-desc">{{featuredMenu.desc}}</text>
-          <view class="tag-row">
-            <text class="tag" wx:for="{{featuredMenu.ingredients}}" wx:key="*this">{{item}}</text>
-          </view>
-          <view class="featured-bottom">
-            <text class="featured-nutrition">{{featuredMenu.nutrition}}</text>
-            <button
-              class="like-btn {{featuredMenu.liked ? 'liked' : ''}}"
-              data-id="{{featuredMenu.id}}"
-              catchtap="toggleLike"
-            >
-              ♥ {{featuredMenu.likeCount}}
-            </button>
+        <view class="combo-items">
+          <view
+            class="combo-item"
+            wx:for="{{comboRecommendation.items}}"
+            wx:key="id"
+            data-id="{{item.id}}"
+            bindtap="openMenuDetail"
+          >
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="combo-photo"></image>
+            <view wx:else class="combo-art menu-art-{{item.color}}">
+              <text>{{item.initial}}</text>
+            </view>
+            <view class="combo-copy">
+              <text class="combo-menu-name">{{item.name}}</text>
+              <text class="combo-menu-desc">{{item.desc}}</text>
+            </view>
           </view>
         </view>
       </view>
       <view wx:else class="empty-card">
-        <text class="empty-card-title">暂无推荐素食</text>
-        <text class="empty-card-desc">后台添加菜单后，这里会显示今日推荐。</text>
+        <text class="empty-card-title">暂无套餐推荐</text>
+        <text class="empty-card-desc">后台设置套餐后，这里会显示搭配组合。</text>
       </view>
 
       <view class="section-header compact">

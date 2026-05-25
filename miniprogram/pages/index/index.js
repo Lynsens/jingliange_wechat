@@ -194,6 +194,19 @@ function getFeaturedMenu(menus) {
   return menus.find((item) => item.isRecommended) || menus[0] || null
 }
 
+function normalizeCombo(combo) {
+  if (!combo || !Array.isArray(combo.items) || !combo.items.length) {
+    return null
+  }
+
+  return {
+    id: combo.id,
+    title: combo.title || '套餐推荐',
+    description: combo.description || '按净莲阁今日菜品搭配取餐。',
+    items: combo.items.slice(0, 4).map((item, index) => normalizeMenu(item, index))
+  }
+}
+
 function normalizeComment(item) {
   const userName = item.user_nickname || '莲友'
   return {
@@ -248,6 +261,7 @@ Page({
     backendError: '',
     aboutDescription: '净莲阁以素食、茶会与公益活动连接同修善友。小程序将承载菜单展示、活动发布和餐厅信息。',
     featuredMenu: allMenus[0],
+    comboRecommendation: null,
     selectedMenu: null,
     detailLoading: false,
     detailDragStartY: 0,
@@ -284,6 +298,7 @@ Page({
 
     const results = await Promise.all([
       this.loadMenus(),
+      this.loadCombo(),
       this.loadAbout(),
       this.loadActivities()
     ])
@@ -318,6 +333,19 @@ Page({
       }
       return { success: true }
     } catch (e) {
+      return { success: false, message: this.getErrorMessage(e) }
+    }
+  },
+
+  async loadCombo() {
+    try {
+      const combo = normalizeCombo(await api.getActiveCombo())
+      this.setData({
+        comboRecommendation: combo
+      })
+      return { success: true }
+    } catch (e) {
+      this.setData({ comboRecommendation: null })
       return { success: false, message: this.getErrorMessage(e) }
     }
   },
@@ -437,15 +465,35 @@ Page({
       return updated || item
     }))
 
+    const combo = this.data.comboRecommendation
+    const comboRecommendation = combo ? Object.assign({}, combo, {
+      items: combo.items.map((item) => {
+        if (item.id !== menuId) {
+          return item
+        }
+
+        const liked = !item.liked
+        return Object.assign({}, item, {
+          liked,
+          likeCount: item.likeCount + (liked ? 1 : -1)
+        })
+      })
+    }) : null
+
     this.setData({
       menus: this.filterMenus(this.data.keyword),
-      featuredMenu: getFeaturedMenu(allMenus)
+      featuredMenu: getFeaturedMenu(allMenus),
+      comboRecommendation
     })
   },
 
   async openMenuDetail(e) {
     const menuId = Number(e.currentTarget.dataset.id)
-    const selectedMenu = allMenus.find((item) => item.id === menuId)
+    const comboItems = this.data.comboRecommendation ? this.data.comboRecommendation.items : []
+    const selectedMenu = allMenus.find((item) => item.id === menuId) || comboItems.find((item) => item.id === menuId)
+    if (!selectedMenu) {
+      return
+    }
     this.setData({
       selectedMenu,
       detailLoading: true,

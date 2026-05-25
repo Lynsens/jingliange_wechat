@@ -21,6 +21,25 @@ function getMenuList(name) {
   })
 }
 
+function getActiveCombo() {
+  return request({
+    url: '/combo/active',
+    method: 'GET'
+  }).then((combo) => {
+    if (!combo || !Array.isArray(combo.items)) {
+      return combo
+    }
+
+    return {
+      ...combo,
+      items: combo.items.map((item) => ({
+        ...item,
+        image_url: normalizeUploadImageUrl(item.image_url)
+      }))
+    }
+  })
+}
+
 function likeMenu(menuId) {
   return request({
     url: '/menu/like',
@@ -289,6 +308,60 @@ function topActivity(id, isTop) {
   })
 }
 
+function adminGetComboList(keyword) {
+  return request({
+    admin: true,
+    url: '/combo/list',
+    method: 'POST',
+    data: {
+      keyword: keyword || '',
+      page_size: 50,
+      page_number: 0
+    }
+  })
+}
+
+function createCombo(data) {
+  return request({
+    admin: true,
+    url: '/combo/create',
+    method: 'POST',
+    data
+  })
+}
+
+function updateCombo(data) {
+  return request({
+    admin: true,
+    url: '/combo/update',
+    method: 'PUT',
+    data
+  })
+}
+
+function activateCombo(id, isActive) {
+  return request({
+    admin: true,
+    url: '/combo/active',
+    method: 'PUT',
+    data: {
+      id,
+      is_active: isActive ? 1 : 0
+    }
+  })
+}
+
+function deleteCombo(id) {
+  return request({
+    admin: true,
+    url: '/combo/delete',
+    method: 'DELETE',
+    data: {
+      id
+    }
+  })
+}
+
 function adminGetSuggestionList(keyword, handleStatus) {
   return request({
     admin: true,
@@ -317,6 +390,7 @@ function updateSuggestionStatus(id, handleStatus) {
 
 module.exports = {
   getMenuList,
+  getActiveCombo,
   likeMenu,
   getMenuComments,
   commentMenu,
@@ -340,6 +414,11 @@ module.exports = {
   updateActivity,
   deleteActivity,
   topActivity,
+  adminGetComboList,
+  createCombo,
+  updateCombo,
+  activateCombo,
+  deleteCombo,
   adminGetSuggestionList,
   updateSuggestionStatus
 }

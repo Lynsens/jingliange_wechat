@@ -251,6 +251,7 @@
 }
 
 .featured-menu,
+.combo-card,
 .menu-card,
 .donation-panel,
 .form-panel,
@@ -270,6 +271,120 @@
   min-height: 188rpx;
   padding: 0;
   overflow: hidden;
+}
+
+.combo-card {
+  padding: 18rpx;
+}
+
+.combo-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.combo-title-block {
+  min-width: 0;
+  flex: 1;
+}
+
+.combo-title,
+.combo-desc,
+.combo-menu-name,
+.combo-menu-desc {
+  display: block;
+}
+
+.combo-title {
+  color: #17120f;
+  font-size: 31rpx;
+  font-weight: 800;
+  line-height: 40rpx;
+}
+
+.combo-desc {
+  margin-top: 4rpx;
+  color: #6f5545;
+  font-size: 23rpx;
+  line-height: 32rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.combo-count {
+  flex: 0 0 auto;
+  min-width: 74rpx;
+  height: 42rpx;
+  border-radius: 999rpx;
+  background: #f8dfca;
+  color: #7c4a27;
+  font-size: 21rpx;
+  font-weight: 700;
+  line-height: 42rpx;
+  text-align: center;
+}
+
+.combo-items {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.combo-item {
+  display: flex;
+  min-width: 0;
+  gap: 10rpx;
+  align-items: center;
+  border-radius: 12rpx;
+  background: #fff7f0;
+  padding: 10rpx;
+}
+
+.combo-photo,
+.combo-art {
+  flex: 0 0 auto;
+  width: 74rpx;
+  height: 74rpx;
+  border-radius: 10rpx;
+  background: #f8c9a4;
+}
+
+.combo-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b2717;
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.combo-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.combo-menu-name {
+  color: #17120f;
+  font-size: 24rpx;
+  font-weight: 800;
+  line-height: 32rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.combo-menu-desc {
+  margin-top: 2rpx;
+  color: #7b6253;
+  font-size: 20rpx;
+  line-height: 28rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .featured-hero {
