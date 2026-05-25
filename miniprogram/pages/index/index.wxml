@@ -69,9 +69,7 @@
               <text wx:else class="combo-menu-desc">后台设置后显示</text>
             </view>
             <image wx:if="{{item.menu && item.menu.imageUrl}}" src="{{item.menu.imageUrl}}" mode="aspectFill" class="combo-photo"></image>
-            <view wx:elif="{{item.menu}}" class="combo-art menu-art-{{item.menu.color}}">
-              <text>{{item.menu.initial}}</text>
-            </view>
+            <image wx:elif="{{item.menu}}" src="../../images/jingliange-logo.jpg" mode="aspectFit" class="combo-photo logo-default-photo"></image>
           </view>
         </view>
       </view>
@@ -118,9 +116,7 @@
         <view class="menu-card" wx:for="{{menus}}" wx:key="id">
           <view class="menu-card-main" data-id="{{item.id}}" bindtap="openMenuDetail">
             <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
-            <view wx:else class="menu-art menu-art-{{item.color}}">
-              <text>{{item.initial}}</text>
-            </view>
+            <image wx:else src="../../images/jingliange-logo.jpg" mode="aspectFit" class="menu-photo logo-default-photo"></image>
             <view class="menu-info">
               <view class="menu-headline">
                 <view class="menu-title-block">
@@ -237,9 +233,7 @@
         <view class="sheet-handle"></view>
       </view>
       <image wx:if="{{selectedMenu.imageUrl}}" src="{{selectedMenu.imageUrl}}" mode="aspectFill" class="sheet-photo"></image>
-      <view wx:else class="menu-art menu-art-{{selectedMenu.color}} sheet-art">
-        <text>{{selectedMenu.initial}}</text>
-      </view>
+      <image wx:else src="../../images/jingliange-logo.jpg" mode="aspectFit" class="sheet-photo logo-default-photo"></image>
       <text class="sheet-title">{{selectedMenu.name}}</text>
       <text class="sheet-desc">{{selectedMenu.desc}}</text>
       <view class="sheet-meta">

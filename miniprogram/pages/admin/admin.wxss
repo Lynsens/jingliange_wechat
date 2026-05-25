@@ -351,6 +351,10 @@
   font-size: 23rpx;
 }
 
+.logo-default-photo {
+  background: #f8c9a4;
+}
+
 .image-actions {
   min-width: 0;
   flex: 1;

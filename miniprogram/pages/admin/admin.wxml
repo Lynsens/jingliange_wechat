@@ -141,9 +141,7 @@
     </picker>
     <view class="image-uploader">
       <image wx:if="{{form.imageUrl}}" class="image-preview" src="{{form.imageUrl}}" mode="aspectFill"></image>
-      <view wx:else class="image-placeholder">
-        <text>菜品图片</text>
-      </view>
+      <image wx:else class="image-preview logo-default-photo" src="../../images/jingliange-logo.jpg" mode="aspectFit"></image>
       <view class="image-actions">
         <text class="image-url">{{form.imageUrl ? '图片已上传' : '从相册选择或拍照上传'}}</text>
         <button class="ghost-btn image-btn" loading="{{uploadingImage}}" bindtap="chooseMenuImage">选择图片</button>

@@ -423,6 +423,10 @@
   background: #f5dcc8;
 }
 
+.logo-default-photo {
+  background: #f8c9a4;
+}
+
 .menu-art-green {
   background: #f8c9a4;
 }
