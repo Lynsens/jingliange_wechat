@@ -45,6 +45,14 @@ const fallbackActivities = [
 const colors = ['green', 'pink', 'gold']
 const MAX_DETAIL_ITEMS = 3
 
+function splitIngredientNames(value) {
+  return String(value || '')
+    .replace(/[{}"]/g, '')
+    .split(/[,，、\s]+/)
+    .map((item) => item.trim())
+    .filter((item) => item && !/^\d+(?:\.\d+)?(?:g|ml)$/i.test(item))
+}
+
 function toArray(value) {
   if (Array.isArray(value)) {
     return value
@@ -74,6 +82,28 @@ function toArray(value) {
 
 function toDisplayList(value, fallback) {
   const items = toArray(value)
+  return (items.length ? items : fallback).slice(0, MAX_DETAIL_ITEMS)
+}
+
+function toIngredientList(value, fallback) {
+  if (!value) {
+    return fallback.slice(0, MAX_DETAIL_ITEMS)
+  }
+
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return (parsed.length ? parsed : fallback).slice(0, MAX_DETAIL_ITEMS)
+    }
+    if (parsed && typeof parsed === 'object') {
+      const names = Object.keys(parsed)
+      return (names.length ? names : fallback).slice(0, MAX_DETAIL_ITEMS)
+    }
+  } catch (e) {
+    // Fall through to split common plain-text formats.
+  }
+
+  const items = splitIngredientNames(value)
   return (items.length ? items : fallback).slice(0, MAX_DETAIL_ITEMS)
 }
 
@@ -146,7 +176,7 @@ function normalizeImageUrl(url) {
 
 function normalizeMenu(item, index) {
   const name = item.name || '未命名素食'
-  const ingredients = toDisplayList(item.ingredients, ['素食'])
+  const ingredients = toIngredientList(item.ingredients, ['素食'])
   const nutritionItems = toDisplayList(item.nutrition, ['清淡素食'])
   return {
     id: item.id,

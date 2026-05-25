@@ -18,6 +18,15 @@ const SUGGESTION_FILTERS = [
 ]
 let rowSeed = 0
 
+function splitIngredientNames(value) {
+  return String(value || '')
+    .replace(/[{}"]/g, '')
+    .split(/[,，、\n\s]+/)
+    .map((item) => item.trim())
+    .filter((item) => item && !/^\d+(?:\.\d+)?(?:g|ml)$/i.test(item))
+    .slice(0, MAX_METRIC_ROWS)
+}
+
 function createMetricRow() {
   rowSeed += 1
   return {
@@ -36,7 +45,7 @@ function createEmptyForm() {
     imageUrl: '',
     isRecommended: false,
     isArchived: false,
-    ingredients: [createMetricRow()],
+    ingredients: '',
     nutrition: [createMetricRow()]
   }
 }
@@ -72,6 +81,30 @@ function rowsToJsonObjectText(rows) {
   })
 
   return JSON.stringify(result)
+}
+
+function ingredientTextToJsonText(value) {
+  return JSON.stringify(splitIngredientNames(value))
+}
+
+function parseIngredientText(value) {
+  if (!value) {
+    return ''
+  }
+
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return parsed.slice(0, MAX_METRIC_ROWS).join('、')
+    }
+    if (parsed && typeof parsed === 'object') {
+      return Object.keys(parsed).slice(0, MAX_METRIC_ROWS).join('、')
+    }
+  } catch (e) {
+    // Keep plain text values as-is.
+  }
+
+  return splitIngredientNames(value).join('、')
 }
 
 function hasCompleteRows(rows) {
@@ -781,7 +814,7 @@ Page({
           imageUrl: menu.imageUrl,
           isRecommended: menu.isRecommended,
           isArchived: menu.isArchived,
-          ingredients: parseMetricRows(menu.ingredients),
+          ingredients: parseIngredientText(menu.ingredients),
           nutrition: parseMetricRows(menu.nutrition)
         },
         formReady: true
@@ -930,14 +963,6 @@ Page({
       return
     }
 
-    if (hasAnyMetricValue(form.ingredients) && (!hasCompleteRows(form.ingredients) || hasPartialRows(form.ingredients))) {
-      wx.showToast({
-        title: '请完善食材',
-        icon: 'none'
-      })
-      return
-    }
-
     if (hasAnyMetricValue(form.nutrition) && (!hasCompleteRows(form.nutrition) || hasPartialRows(form.nutrition))) {
       wx.showToast({
         title: '请完善营养',
@@ -954,7 +979,7 @@ Page({
         name,
         desc,
         image_url: imageUrl,
-        ingredients: rowsToJsonObjectText(form.ingredients),
+        ingredients: ingredientTextToJsonText(form.ingredients),
         nutrition: rowsToJsonObjectText(form.nutrition),
         is_recommended: form.isRecommended && !form.isArchived ? 1 : 0,
         is_archived: form.isArchived ? 1 : 0

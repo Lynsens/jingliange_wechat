@@ -147,56 +147,15 @@
       </view>
       <switch checked="{{form.isArchived}}" color="#ad693e" bindchange="onMenuArchivedChange" />
     </view>
-    <text class="field-label">主要食材</text>
-    <view class="metric-list">
-      <view class="metric-header">
-        <text>名称</text>
-        <text>数量</text>
-        <text>单位</text>
-      </view>
-      <view class="metric-row" wx:for="{{form.ingredients}}" wx:key="id">
-        <input
-          class="metric-input name-input"
-          placeholder="豆腐"
-          placeholder-class="placeholder"
-          value="{{item.name}}"
-          data-type="ingredients"
-          data-index="{{index}}"
-          data-field="name"
-          bindinput="updateMetricField"
-        />
-        <input
-          class="metric-input quantity-input"
-          type="digit"
-          placeholder="100"
-          placeholder-class="placeholder"
-          value="{{item.quantity}}"
-          data-type="ingredients"
-          data-index="{{index}}"
-          data-field="quantity"
-          bindinput="updateMetricField"
-        />
-        <picker
-          range="{{unitOptions}}"
-          value="{{item.unitIndex}}"
-          data-type="ingredients"
-          data-index="{{index}}"
-          bindchange="updateMetricUnit"
-        >
-          <view class="metric-picker {{item.unit ? '' : 'metric-picker-empty'}}">{{item.unit || '单位'}}</view>
-        </picker>
-        <button
-          wx:if="{{form.ingredients.length > 1}}"
-          class="row-remove-btn"
-          data-type="ingredients"
-          data-index="{{index}}"
-          bindtap="removeMetricRow"
-        >
-          删除
-        </button>
-      </view>
-      <button wx:if="{{form.ingredients.length < 3}}" class="row-add-btn" data-type="ingredients" bindtap="addMetricRow">添加食材</button>
-    </view>
+    <text class="field-label">主要食材（可选）</text>
+    <input
+      class="field"
+      placeholder="例如：豆腐、紫菜、番茄，最多展示三项"
+      placeholder-class="placeholder"
+      value="{{form.ingredients}}"
+      data-field="ingredients"
+      bindinput="updateField"
+    />
     <text class="field-label">营养价值表</text>
     <view class="metric-list">
       <view class="metric-header">
