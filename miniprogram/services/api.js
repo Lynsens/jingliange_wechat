@@ -66,6 +66,16 @@ function deleteMenuComment(commentId) {
   })
 }
 
+function likeMenuComment(commentId) {
+  return request({
+    url: '/menu/comment/like',
+    method: 'POST',
+    data: {
+      comment_id: commentId
+    }
+  })
+}
+
 function getDescription() {
   return request({
     url: '/about/getDescription',
@@ -282,6 +292,7 @@ module.exports = {
   getMenuComments,
   commentMenu,
   deleteMenuComment,
+  likeMenuComment,
   getDescription,
   getActivityList,
   login,
