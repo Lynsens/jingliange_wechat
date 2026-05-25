@@ -130,7 +130,6 @@
               <view class="menu-headline">
                 <view class="menu-title-block">
                   <text class="menu-name">{{item.name}}</text>
-                  <text class="menu-desc">{{item.desc}}</text>
                 </view>
                 <button
                   class="like-btn menu-like-btn {{item.liked ? 'liked' : ''}}"
@@ -140,6 +139,7 @@
                   ♥ {{item.likeCount}}
                 </button>
               </view>
+              <text class="menu-desc">{{item.desc}}</text>
               <view class="menu-card-details">
                 <view class="menu-detail-row">
                   <text class="menu-detail-label">主要食材</text>
