@@ -16,3 +16,18 @@ button {
 button {
   margin: 0;
 }
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  color: transparent;
+  display: none;
+}
+
+scroll-view ::-webkit-scrollbar,
+textarea ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  color: transparent;
+  display: none;
+}
