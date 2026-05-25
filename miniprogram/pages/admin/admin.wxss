@@ -192,6 +192,31 @@
   height: 128rpx;
 }
 
+.category-picker {
+  position: relative;
+  height: 72rpx;
+  margin-top: 10rpx;
+  box-sizing: border-box;
+  border-radius: 10rpx;
+  background: #fff7f0;
+  color: #17120f;
+  font-size: 25rpx;
+  line-height: 72rpx;
+  padding: 0 42rpx 0 18rpx;
+}
+
+.category-picker::after {
+  content: "";
+  position: absolute;
+  top: 31rpx;
+  right: 18rpx;
+  width: 0;
+  height: 0;
+  border-left: 7rpx solid transparent;
+  border-right: 7rpx solid transparent;
+  border-top: 9rpx solid #a4836e;
+}
+
 .metric-list {
   margin-top: 10rpx;
   border-radius: 12rpx;
@@ -529,6 +554,11 @@
   flex-wrap: wrap;
   gap: 8rpx;
   margin-top: 10rpx;
+}
+
+.category-pill {
+  background: #f8dfca;
+  color: #7c4a27;
 }
 
 .combo-menu-picker {

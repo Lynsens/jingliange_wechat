@@ -183,6 +183,7 @@ function normalizeMenu(item, index) {
     id: item.id,
     initial: '莲',
     name,
+    category: item.category || '热食',
     desc: item.desc || '暂无介绍',
     imageUrl: normalizeImageUrl(item.image_url),
     ingredients,
@@ -464,7 +465,7 @@ Page({
     }
 
     return allMenus.filter((item) => {
-      const text = `${item.name}${item.desc}${item.ingredients.join('')}`
+      const text = `${item.name}${item.category}${item.desc}${item.ingredients.join('')}`
       return text.indexOf(keyword) > -1
     })
   },

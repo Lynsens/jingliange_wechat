@@ -3,6 +3,7 @@ const app = getApp()
 
 const DEFAULT_ADMIN_USERNAME = 'admin'
 const UNIT_OPTIONS = ['g', 'ml']
+const MENU_CATEGORIES = ['前菜/小菜', '主食', '热食', '甜品/饮品']
 const MAX_METRIC_ROWS = 3
 const IMAGE_COMPRESS_QUALITY = 72
 const IMAGE_COMPRESS_WIDTH = 1280
@@ -43,6 +44,8 @@ function createEmptyForm() {
   return {
     name: '',
     desc: '',
+    category: '热食',
+    categoryIndex: MENU_CATEGORIES.indexOf('热食'),
     imageUrl: '',
     isRecommended: false,
     isArchived: false,
@@ -148,9 +151,12 @@ function parseMetricRows(value) {
 }
 
 function formatMenu(item) {
+  const category = MENU_CATEGORIES.indexOf(item.category) >= 0 ? item.category : '热食'
   return {
     id: item.id,
     name: item.name || '未命名素食',
+    category,
+    categoryIndex: MENU_CATEGORIES.indexOf(category),
     desc: item.desc || '暂无介绍',
     imageUrl: item.image_url || '',
     ingredients: item.ingredients || '',
@@ -168,7 +174,7 @@ function filterAdminMenus(menus, keyword) {
   }
 
   return menus.filter((item) => {
-    return `${item.id} ${item.name} ${item.desc}`.toLowerCase().indexOf(text) !== -1
+    return `${item.id} ${item.name} ${item.category} ${item.desc}`.toLowerCase().indexOf(text) !== -1
   })
 }
 
@@ -239,7 +245,8 @@ function filterComments(comments, keyword) {
 function formatCombo(item) {
   const items = Array.isArray(item.items) ? item.items.map((menu) => ({
     id: menu.id,
-    name: menu.name || '未命名素食'
+    name: menu.name || '未命名素食',
+    category: menu.category || '热食'
   })) : []
   return {
     id: item.id,
@@ -376,6 +383,7 @@ Page({
     archiveFilter: 'all',
     archiveFilters: ARCHIVE_FILTERS,
     unitOptions: UNIT_OPTIONS,
+    menuCategoryOptions: MENU_CATEGORIES,
     menus: [],
     displayMenus: [],
     showEditor: false,
@@ -777,6 +785,14 @@ Page({
     })
   },
 
+  updateMenuCategory(e) {
+    const categoryIndex = Number(e.detail.value)
+    this.setData({
+      'form.categoryIndex': categoryIndex,
+      'form.category': this.data.menuCategoryOptions[categoryIndex]
+    })
+  },
+
   resetForm() {
     this.setData({
       formReady: false,
@@ -816,6 +832,8 @@ Page({
         form: {
           name: menu.name,
           desc: menu.desc,
+          category: menu.category,
+          categoryIndex: menu.categoryIndex,
           imageUrl: menu.imageUrl,
           isRecommended: menu.isRecommended,
           isArchived: menu.isArchived,
@@ -983,6 +1001,7 @@ Page({
       const payload = {
         name,
         desc,
+        category: form.category || '热食',
         image_url: imageUrl,
         ingredients: ingredientTextToJsonText(form.ingredients),
         nutrition: rowsToJsonObjectText(form.nutrition),
