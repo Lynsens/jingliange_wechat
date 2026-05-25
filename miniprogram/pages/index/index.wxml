@@ -122,8 +122,10 @@
       <view wx:if="{{menus.length > 0}}" class="menu-list">
         <view class="menu-card" wx:for="{{menus}}" wx:key="id">
           <view class="menu-card-main" data-id="{{item.id}}" bindtap="openMenuDetail">
-            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
-            <image wx:else src="../../images/jingliange-logo.jpg" mode="aspectFit" class="menu-photo logo-default-photo"></image>
+            <view class="menu-photo-wrap">
+              <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="menu-photo"></image>
+              <image wx:else src="../../images/jingliange-logo.jpg" mode="aspectFit" class="menu-photo logo-default-photo"></image>
+            </view>
             <view class="menu-info">
               <view class="menu-headline">
                 <view class="menu-title-block">

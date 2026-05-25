@@ -375,9 +375,8 @@
 }
 
 .menu-photo {
-  flex: 0 0 auto;
-  width: 148rpx;
-  height: 148rpx;
+  width: 142rpx;
+  height: 142rpx;
   border-radius: 14rpx;
   background: #f5dcc8;
 }
@@ -650,13 +649,21 @@
 }
 
 .menu-card {
-  padding: 18rpx 24rpx;
+  padding: 18rpx 22rpx;
 }
 
 .menu-card-main {
   display: flex;
-  align-items: flex-start;
-  gap: 18rpx;
+  align-items: stretch;
+  gap: 16rpx;
+}
+
+.menu-photo-wrap {
+  flex: 0 0 154rpx;
+  width: 154rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-info,
@@ -669,7 +676,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14rpx;
+  gap: 10rpx;
 }
 
 .leader-topline {
@@ -687,8 +694,8 @@
 
 .menu-detail-row {
   display: grid;
-  grid-template-columns: 118rpx minmax(0, 1fr);
-  gap: 12rpx;
+  grid-template-columns: 104rpx minmax(0, 1fr);
+  gap: 10rpx;
   align-items: start;
 }
 
@@ -786,10 +793,10 @@
 }
 
 .menu-like-btn {
-  flex-basis: 112rpx;
-  width: 112rpx;
-  min-width: 112rpx;
-  max-width: 112rpx;
+  flex-basis: 96rpx;
+  width: 96rpx;
+  min-width: 96rpx;
+  max-width: 96rpx;
   height: 48rpx;
   font-size: 22rpx;
 }
