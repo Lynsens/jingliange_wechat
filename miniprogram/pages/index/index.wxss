@@ -132,21 +132,21 @@
 }
 
 .tabs {
-  margin: 18rpx 0 0;
+  margin: 20rpx 0 0;
   white-space: nowrap;
 }
 
 .tab-track {
   display: flex;
   width: 100%;
-  gap: 12rpx;
+  gap: 14rpx;
   box-sizing: border-box;
 }
 
 .tab {
   flex: 1;
   min-width: 0;
-  height: 56rpx;
+  height: 64rpx;
   border: 1rpx solid rgba(23, 18, 15, 0.1);
   border-radius: 999rpx;
   background: #fffaf6;
@@ -155,7 +155,8 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  font-size: 25rpx;
+  font-size: 27rpx;
+  font-weight: 700;
   line-height: 1;
   text-align: center;
 }
