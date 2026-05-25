@@ -54,16 +54,18 @@
             data-id="{{item.menu ? item.menu.id : 0}}"
             bindtap="openMenuDetail"
           >
-            <view class="recommendation-index">
-              <text>{{item.order}}</text>
+            <view class="recommendation-media">
+              <image wx:if="{{item.menu && item.menu.imageUrl}}" src="{{item.menu.imageUrl}}" mode="aspectFill" class="combo-photo"></image>
+              <image wx:elif="{{item.menu}}" src="../../images/jingliange-logo.jpg" mode="aspectFit" class="combo-photo logo-default-photo"></image>
+              <view class="recommendation-index">
+                <text>{{item.order}}</text>
+              </view>
             </view>
             <view class="recommendation-copy">
               <text wx:if="{{item.menu}}" class="combo-menu-name">{{item.menu.name}}</text>
               <text wx:if="{{item.menu}}" class="combo-menu-desc">{{item.menu.desc}}</text>
               <text wx:else class="combo-menu-desc">后台设置后显示</text>
             </view>
-            <image wx:if="{{item.menu && item.menu.imageUrl}}" src="{{item.menu.imageUrl}}" mode="aspectFill" class="combo-photo"></image>
-            <image wx:elif="{{item.menu}}" src="../../images/jingliange-logo.jpg" mode="aspectFit" class="combo-photo logo-default-photo"></image>
           </view>
         </view>
       </view>

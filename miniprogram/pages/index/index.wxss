@@ -245,13 +245,13 @@
 }
 
 .recommendation-slot {
-  display: flex;
+  display: block;
+  position: relative;
   min-width: 0;
-  gap: 15rpx;
-  align-items: center;
   border-radius: 12rpx;
   background: #fff7f0;
-  padding: 18rpx 16rpx;
+  padding: 14rpx;
+  overflow: hidden;
 }
 
 .recommendation-slot-empty {
@@ -259,12 +259,14 @@
 }
 
 .recommendation-index {
-  flex: 0 0 auto;
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46rpx;
-  height: 46rpx;
+  width: 44rpx;
+  height: 44rpx;
   border-radius: 999rpx;
   background: #ad693e;
   color: #fff;
@@ -274,14 +276,22 @@
 
 .recommendation-copy {
   min-width: 0;
-  flex: 1;
+  margin-top: 12rpx;
+}
+
+.recommendation-media {
+  position: relative;
+  height: 112rpx;
+  border-radius: 12rpx;
+  background: #f8dfca;
+  overflow: hidden;
 }
 
 .combo-photo,
 .combo-art {
-  flex: 0 0 auto;
-  width: 84rpx;
-  height: 84rpx;
+  display: block;
+  width: 100%;
+  height: 112rpx;
   border-radius: 12rpx;
   background: #f8c9a4;
 }
@@ -300,17 +310,17 @@
   color: #17120f;
   font-size: 28rpx;
   font-weight: 800;
-  line-height: 36rpx;
+  line-height: 38rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .combo-menu-desc {
-  margin-top: 4rpx;
+  margin-top: 2rpx;
   color: #7b6253;
   font-size: 23rpx;
-  line-height: 32rpx;
+  line-height: 31rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
