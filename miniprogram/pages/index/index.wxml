@@ -1,5 +1,5 @@
 <view class="page">
-  <scroll-view scroll-y="{{activeTab !== 'home'}}" class="page-scroll {{activeTab === 'home' ? 'home-scroll' : ''}}" show-scrollbar="{{false}}">
+  <scroll-view scroll-y class="page-scroll" show-scrollbar="{{false}}">
     <view class="hero">
       <view class="hero-main">
         <view class="hero-copy">
@@ -37,7 +37,7 @@
       </view>
     </scroll-view>
 
-    <view hidden="{{activeTab !== 'home'}}" class="section">
+    <view hidden="{{activeTab !== 'home'}}" class="section home-section">
       <view class="section-header">
         <text class="section-title">今日推荐</text>
       </view>
@@ -141,19 +141,19 @@
                   ♥ {{item.likeCount}}
                 </button>
               </view>
-            </view>
-          </view>
-          <view class="menu-card-details">
-            <view class="menu-detail-row">
-              <text class="menu-detail-label">主要食材</text>
-              <view class="tag-row menu-detail-tags">
-                <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
-              </view>
-            </view>
-            <view class="menu-detail-row">
-              <text class="menu-detail-label">营养价值</text>
-              <view class="nutrition-chip-row">
-                <text class="nutrition-summary-item" wx:for="{{item.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+              <view class="menu-card-details">
+                <view class="menu-detail-row">
+                  <text class="menu-detail-label">主要食材</text>
+                  <view class="tag-row menu-detail-tags">
+                    <text class="tag" wx:for="{{item.ingredients}}" wx:for-item="ingredient" wx:key="*this">{{ingredient}}</text>
+                  </view>
+                </view>
+                <view class="menu-detail-row">
+                  <text class="menu-detail-label">营养价值</text>
+                  <view class="nutrition-chip-row">
+                    <text class="nutrition-summary-item" wx:for="{{item.nutritionItems}}" wx:for-item="nutrition" wx:key="*this">{{nutrition}}</text>
+                  </view>
+                </view>
               </view>
             </view>
           </view>

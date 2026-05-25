@@ -10,10 +10,6 @@
   padding: 108rpx 28rpx 0;
 }
 
-.home-scroll {
-  overflow: hidden;
-}
-
 .hero {
   position: relative;
   overflow: hidden;
@@ -517,28 +513,28 @@
   white-space: nowrap;
 }
 
-.home-scroll .activity-list {
+.home-section .activity-list {
   gap: 10rpx;
 }
 
-.home-scroll .activity-item {
+.home-section .activity-item {
   align-items: flex-start;
   gap: 16rpx;
   padding: 16rpx 18rpx;
 }
 
-.home-scroll .activity-date {
+.home-section .activity-date {
   width: 132rpx;
   font-size: 23rpx;
   line-height: 34rpx;
 }
 
-.home-scroll .activity-title {
+.home-section .activity-title {
   font-size: 27rpx;
   line-height: 36rpx;
 }
 
-.home-scroll .activity-place {
+.home-section .activity-place {
   margin-top: 2rpx;
   font-size: 23rpx;
   line-height: 32rpx;
