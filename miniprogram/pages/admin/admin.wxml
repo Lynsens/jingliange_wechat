@@ -250,10 +250,10 @@
             <text class="menu-desc">{{item.description}}</text>
             <text class="menu-meta">ID {{item.id}}</text>
             <view class="combo-admin-tags">
-              <text class="status-pill archived-pill" wx:for="{{item.items}}" wx:key="id">{{item.slotLabel}}：{{item.name}} · {{item.category}}</text>
+              <text class="status-pill archived-pill" wx:for="{{item.items}}" wx:key="id">{{item.slotLabel}}：{{item.name}}</text>
             </view>
           </view>
-          <view class="menu-actions">
+          <view class="menu-actions combo-admin-actions">
             <button class="edit-btn" data-id="{{item.id}}" bindtap="editCombo">编辑</button>
             <button class="minor-btn" data-id="{{item.id}}" data-active="{{item.isActive ? 1 : 0}}" bindtap="toggleComboActive">{{item.isActive ? '取消' : '启用'}}</button>
             <button class="delete-btn" data-id="{{item.id}}" data-title="{{item.title}}" bindtap="deleteCombo">删除</button>
