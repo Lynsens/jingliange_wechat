@@ -1,5 +1,5 @@
 <view class="page">
-  <scroll-view scroll-y class="page-scroll" show-scrollbar="{{false}}">
+  <view class="page-scroll">
     <view class="hero">
       <view class="hero-main">
         <view class="hero-copy">
@@ -222,7 +222,7 @@
     </view>
 
     <view wx:if="{{activeTab !== 'home'}}" class="bottom-space"></view>
-  </scroll-view>
+  </view>
 
   <view wx:if="{{selectedMenu}}" class="detail-mask" bindtap="closeMenuDetail">
     <view
