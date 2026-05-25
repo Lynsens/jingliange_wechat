@@ -286,7 +286,7 @@ Page({
     ],
     menus: allMenus,
     activities: fallbackActivities,
-    homeActivities: fallbackActivities.slice(0, 2)
+    homeActivities: fallbackActivities.slice(0, 3)
   },
 
   onLoad() {
@@ -369,7 +369,7 @@ Page({
         const activities = list.map(normalizeActivity)
         this.setData({
           activities,
-          homeActivities: activities.slice(0, 2),
+          homeActivities: activities.slice(0, 3),
           'quickStats[2].value': String(list.length)
         })
       } else if (Array.isArray(list)) {

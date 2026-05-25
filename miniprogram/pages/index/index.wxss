@@ -495,27 +495,30 @@
 }
 
 .home-scroll .activity-list {
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .home-scroll .activity-item {
-  gap: 16rpx;
-  padding: 16rpx 18rpx;
+  align-items: flex-start;
+  gap: 14rpx;
+  padding: 12rpx 16rpx;
 }
 
 .home-scroll .activity-date {
-  width: 130rpx;
-  font-size: 22rpx;
+  width: 124rpx;
+  font-size: 21rpx;
+  line-height: 32rpx;
 }
 
 .home-scroll .activity-title {
-  font-size: 26rpx;
-  line-height: 34rpx;
+  font-size: 25rpx;
+  line-height: 32rpx;
 }
 
 .home-scroll .activity-place {
-  margin-top: 2rpx;
-  font-size: 22rpx;
+  margin-top: 0;
+  font-size: 21rpx;
+  line-height: 30rpx;
 }
 
 .activity-list,
