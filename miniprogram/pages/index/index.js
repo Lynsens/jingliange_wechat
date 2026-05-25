@@ -281,7 +281,7 @@ Page({
     ],
     quickStats: [
       { label: '素食', value: '8' },
-      { label: '功德榜', value: '开发中' },
+      { label: '功德榜', value: '开发中', isText: true },
       { label: '活动', value: '5' }
     ],
     menus: allMenus,

@@ -118,6 +118,13 @@
   line-height: 38rpx;
 }
 
+.stat-value-text {
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
+  font-size: 29rpx;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
 .stat-label {
   margin-top: 4rpx;
   color: #7b6253;
@@ -125,25 +132,31 @@
 }
 
 .tabs {
-  margin: 18rpx -28rpx 0;
+  margin: 18rpx 0 0;
   white-space: nowrap;
 }
 
 .tab-track {
-  display: inline-flex;
-  gap: 16rpx;
-  padding: 0 28rpx;
+  display: flex;
+  width: 100%;
+  gap: 12rpx;
+  box-sizing: border-box;
 }
 
 .tab {
-  min-width: 118rpx;
-  height: 58rpx;
+  flex: 1;
+  min-width: 0;
+  height: 56rpx;
   border: 1rpx solid rgba(23, 18, 15, 0.1);
   border-radius: 999rpx;
   background: #fffaf6;
   color: #6f5545;
-  font-size: 26rpx;
-  line-height: 58rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 25rpx;
+  line-height: 1;
   text-align: center;
 }
 
