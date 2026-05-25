@@ -241,16 +241,10 @@
             <view class="comment-body">
               <view class="comment-topline">
                 <text class="comment-user">{{item.userName}}</text>
-                <view class="comment-side">
-                  <text class="comment-date">{{item.date}}</text>
-                  <button wx:if="{{item.isMine}}" class="comment-delete" data-id="{{item.id}}" catchtap="deleteOwnComment">×</button>
-                </view>
+                <text class="comment-date">{{item.date}}</text>
               </view>
               <text class="comment-text">{{item.comment}}</text>
-              <button class="comment-like {{item.liked ? 'comment-like-active' : ''}}" data-id="{{item.id}}" catchtap="toggleCommentLike">
-                <text>♥</text>
-                <text>{{item.likeCount}}</text>
-              </button>
+              <button wx:if="{{item.isMine}}" class="comment-delete" data-id="{{item.id}}" catchtap="deleteOwnComment">删除</button>
             </view>
           </view>
         </scroll-view>

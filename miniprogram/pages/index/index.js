@@ -203,9 +203,7 @@ function normalizeComment(item) {
     avatarUrl: normalizeImageUrl(item.user_avatar_url),
     comment: item.comment || '随喜赞叹',
     date: formatDate(item.create_time),
-    isMine: Boolean(item.is_mine),
-    likeCount: item.like_count || item.likeCount || 0,
-    liked: Boolean(item.liked)
+    isMine: Boolean(item.is_mine)
   }
 }
 
@@ -585,28 +583,6 @@ Page({
         }
       }
     })
-  },
-
-  async toggleCommentLike(e) {
-    const commentId = Number(e.currentTarget.dataset.id)
-    const selectedMenu = this.data.selectedMenu
-    if (!commentId || !selectedMenu) {
-      return
-    }
-
-    try {
-      await this.ensureAuth()
-      await api.likeMenuComment(commentId)
-      const comments = await api.getMenuComments(selectedMenu.id)
-      this.setData({
-        menuComments: Array.isArray(comments) ? comments.map(normalizeComment) : []
-      })
-    } catch (err) {
-      wx.showToast({
-        title: err.message || '点赞失败',
-        icon: 'none'
-      })
-    }
   },
 
   async ensureAuth() {
