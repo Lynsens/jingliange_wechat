@@ -218,7 +218,7 @@
 }
 
 .combo-card {
-  padding: 20rpx;
+  padding: 24rpx;
 }
 
 .combo-head {
@@ -257,34 +257,21 @@
   white-space: nowrap;
 }
 
-.combo-count {
-  flex: 0 0 auto;
-  min-width: 74rpx;
-  height: 42rpx;
-  border-radius: 999rpx;
-  background: #f8dfca;
-  color: #7c4a27;
-  font-size: 21rpx;
-  font-weight: 700;
-  line-height: 42rpx;
-  text-align: center;
-}
-
 .recommendation-flow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12rpx;
-  margin-top: 16rpx;
+  gap: 14rpx;
+  margin-top: 18rpx;
 }
 
 .recommendation-slot {
   display: flex;
   min-width: 0;
-  gap: 12rpx;
+  gap: 14rpx;
   align-items: center;
   border-radius: 12rpx;
   background: #fff7f0;
-  padding: 12rpx;
+  padding: 16rpx;
 }
 
 .recommendation-slot-empty {
@@ -296,12 +283,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38rpx;
-  height: 38rpx;
+  width: 42rpx;
+  height: 42rpx;
   border-radius: 999rpx;
   background: #ad693e;
   color: #fff;
-  font-size: 20rpx;
+  font-size: 21rpx;
   font-weight: 800;
 }
 
@@ -310,19 +297,11 @@
   flex: 1;
 }
 
-.recommendation-label {
-  display: block;
-  color: #ad693e;
-  font-size: 21rpx;
-  font-weight: 800;
-  line-height: 28rpx;
-}
-
 .combo-photo,
 .combo-art {
   flex: 0 0 auto;
-  width: 64rpx;
-  height: 64rpx;
+  width: 74rpx;
+  height: 74rpx;
   border-radius: 10rpx;
   background: #f8c9a4;
 }
@@ -339,19 +318,19 @@
 
 .combo-menu-name {
   color: #17120f;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 800;
-  line-height: 32rpx;
+  line-height: 34rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .combo-menu-desc {
-  margin-top: 2rpx;
+  margin-top: 4rpx;
   color: #7b6253;
-  font-size: 20rpx;
-  line-height: 28rpx;
+  font-size: 22rpx;
+  line-height: 30rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

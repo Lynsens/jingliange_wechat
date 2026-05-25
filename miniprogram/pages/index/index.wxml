@@ -40,7 +40,6 @@
     <view wx:if="{{activeTab === 'home'}}" class="section">
       <view class="section-header">
         <text class="section-title">今日推荐</text>
-        <text class="section-subtitle">四步取餐，健康饱足</text>
       </view>
 
       <view wx:if="{{comboRecommendation}}" class="combo-card">
@@ -49,7 +48,6 @@
             <text class="combo-title">{{comboRecommendation.title}}</text>
             <text class="combo-desc">{{comboRecommendation.description}}</text>
           </view>
-          <text class="combo-count">4 类</text>
         </view>
         <view class="recommendation-flow">
           <view
@@ -63,7 +61,6 @@
               <text>{{item.order}}</text>
             </view>
             <view class="recommendation-copy">
-              <text class="recommendation-label">{{item.label}}</text>
               <text wx:if="{{item.menu}}" class="combo-menu-name">{{item.menu.name}}</text>
               <text wx:if="{{item.menu}}" class="combo-menu-desc">{{item.menu.desc}}</text>
               <text wx:else class="combo-menu-desc">后台设置后显示</text>
