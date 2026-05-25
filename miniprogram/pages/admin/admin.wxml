@@ -1,7 +1,7 @@
 <view class="admin-page">
   <view class="admin-hero">
     <text class="admin-kicker">净莲阁</text>
-    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、套餐推荐、近期活动、用户评论与建议箱。' : '请输入管理员账号和密码后继续。'}}</text>
+    <text class="admin-desc">{{adminAuthed ? '管理素食菜单、搭配建议、近期活动、用户评论与建议箱。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 
   <view wx:if="{{!adminAuthed}}" class="panel login-panel">
@@ -28,7 +28,7 @@
   <block wx:else>
   <view class="admin-tabs">
     <view class="admin-tab {{adminSection === 'menu' ? 'admin-tab-active' : ''}}" data-section="menu" bindtap="switchAdminSection">菜单管理</view>
-    <view class="admin-tab {{adminSection === 'combo' ? 'admin-tab-active' : ''}}" data-section="combo" bindtap="switchAdminSection">套餐管理</view>
+    <view class="admin-tab {{adminSection === 'combo' ? 'admin-tab-active' : ''}}" data-section="combo" bindtap="switchAdminSection">搭配管理</view>
     <view class="admin-tab {{adminSection === 'activity' ? 'admin-tab-active' : ''}}" data-section="activity" bindtap="switchAdminSection">活动管理</view>
     <view class="admin-tab {{adminSection === 'comment' ? 'admin-tab-active' : ''}}" data-section="comment" bindtap="switchAdminSection">评论管理</view>
     <view class="admin-tab {{adminSection === 'suggestion' ? 'admin-tab-active' : ''}}" data-section="suggestion" bindtap="switchAdminSection">建议管理</view>
@@ -253,10 +253,10 @@
 
   <view wx:if="{{adminSection === 'combo' && !showComboEditor}}" class="panel">
     <view class="panel-header menu-panel-header">
-      <text class="panel-title">套餐列表</text>
+      <text class="panel-title">搭配列表</text>
       <view class="panel-actions">
         <button class="ghost-btn" loading="{{loading}}" bindtap="loadCombos">刷新</button>
-        <button class="compact-primary-btn" bindtap="startCreateCombo">新增套餐</button>
+        <button class="compact-primary-btn" bindtap="startCreateCombo">新增搭配</button>
       </view>
     </view>
 
@@ -264,7 +264,7 @@
       <text class="admin-search-icon">⌕</text>
       <input
         class="admin-search-input"
-        placeholder="搜索套餐、说明或菜品"
+        placeholder="搜索搭配、说明或菜品"
         placeholder-class="placeholder"
         value="{{comboKeyword}}"
         bindinput="onComboKeywordInput"
@@ -297,19 +297,19 @@
     </scroll-view>
 
     <view wx:else class="empty-card">
-      <text class="empty-title">{{loading ? '正在加载套餐' : (comboKeyword ? '没有找到套餐' : '暂无套餐')}}</text>
-      <text class="empty-desc">{{comboKeyword ? '换一个关键词再试。' : '点击新增套餐后会出现在首页。'}}</text>
+      <text class="empty-title">{{loading ? '正在加载搭配' : (comboKeyword ? '没有找到搭配' : '暂无搭配')}}</text>
+      <text class="empty-desc">{{comboKeyword ? '换一个关键词再试。' : '点击新增搭配后会出现在首页。'}}</text>
     </view>
   </view>
 
   <view wx:if="{{adminSection === 'combo' && showComboEditor}}" class="panel">
     <view class="panel-header">
-      <text class="panel-title">{{editingComboId ? '编辑套餐' : '新增套餐'}}</text>
+      <text class="panel-title">{{editingComboId ? '编辑搭配' : '新增搭配'}}</text>
       <button class="ghost-btn" bindtap="resetComboForm">取消</button>
     </view>
     <input
       class="field"
-      placeholder="套餐名称"
+      placeholder="搭配名称"
       placeholder-class="placeholder"
       value="{{comboForm.title}}"
       data-field="title"
@@ -317,7 +317,7 @@
     />
     <textarea
       class="textarea"
-      placeholder="套餐说明"
+      placeholder="搭配说明"
       placeholder-class="placeholder"
       value="{{comboForm.description}}"
       data-field="description"
@@ -326,7 +326,7 @@
     <view class="switch-row">
       <view>
         <text class="switch-title">首页展示</text>
-        <text class="switch-desc">同一时间仅一个套餐生效</text>
+        <text class="switch-desc">同一时间仅一个搭配建议生效</text>
       </view>
       <switch checked="{{comboForm.isActive}}" color="#ad693e" bindchange="onComboActiveChange" />
     </view>
@@ -343,7 +343,7 @@
         <text class="combo-menu-option-desc">{{item.desc}}</text>
       </view>
     </view>
-    <button class="primary-btn" loading="{{saving}}" bindtap="submitCombo">{{editingComboId ? '更新套餐' : '保存套餐'}}</button>
+    <button class="primary-btn" loading="{{saving}}" bindtap="submitCombo">{{editingComboId ? '更新搭配' : '保存搭配'}}</button>
   </view>
 
   <view wx:if="{{adminSection === 'activity' && !showActivityEditor}}" class="panel">

@@ -209,7 +209,7 @@ function formatCombo(item) {
   })) : []
   return {
     id: item.id,
-    title: item.title || '未命名套餐',
+    title: item.title || '未命名搭配',
     description: item.description || '暂无说明',
     isActive: Number(item.is_active || 0) === 1,
     items,
@@ -549,7 +549,7 @@ Page({
     } catch (e) {
       this.setData({ loading: false })
       wx.showToast({
-        title: '套餐加载失败',
+        title: '搭配加载失败',
         icon: 'none'
       })
     }
@@ -1242,7 +1242,7 @@ Page({
     const combo = this.data.combos.find((item) => item.id === id)
     if (!combo) {
       wx.showToast({
-        title: '套餐不存在',
+        title: '搭配不存在',
         icon: 'none'
       })
       return
@@ -1320,7 +1320,7 @@ Page({
 
     if (!title || !form.menuIds.length) {
       wx.showToast({
-        title: '请填写套餐并选择菜品',
+        title: '请填写搭配并选择菜品',
         icon: 'none'
       })
       return
@@ -1375,7 +1375,7 @@ Page({
     const title = e.currentTarget.dataset.title
 
     wx.showModal({
-      title: '删除套餐',
+      title: '删除搭配',
       content: `确认删除「${title}」？`,
       confirmColor: '#ad693e',
       success: async (res) => {

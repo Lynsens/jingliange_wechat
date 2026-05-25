@@ -39,8 +39,8 @@
 
     <view wx:if="{{activeTab === 'home'}}" class="section">
       <view class="section-header">
-        <text class="section-title">套餐推荐</text>
-        <text class="section-subtitle">按组合取餐</text>
+        <text class="section-title">搭配建议</text>
+        <text class="section-subtitle">健康、饱足、好搭配</text>
       </view>
 
       <view wx:if="{{comboRecommendation}}" class="combo-card">
@@ -71,8 +71,8 @@
         </view>
       </view>
       <view wx:else class="empty-card">
-        <text class="empty-card-title">暂无套餐推荐</text>
-        <text class="empty-card-desc">后台设置套餐后，这里会显示搭配组合。</text>
+        <text class="empty-card-title">暂无搭配建议</text>
+        <text class="empty-card-desc">后台设置搭配建议后，这里会显示健康取餐参考。</text>
       </view>
 
       <view class="section-header compact">

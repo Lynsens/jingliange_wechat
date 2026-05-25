@@ -201,8 +201,8 @@ function normalizeCombo(combo) {
 
   return {
     id: combo.id,
-    title: combo.title || '套餐推荐',
-    description: combo.description || '按净莲阁今日菜品搭配取餐。',
+    title: combo.title || '搭配建议',
+    description: combo.description || '按今日菜品推荐更健康、更饱足的取餐方式。',
     items: combo.items.slice(0, 4).map((item, index) => normalizeMenu(item, index))
   }
 }
