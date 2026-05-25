@@ -230,8 +230,8 @@
 
 .combo-desc {
   color: #6f5545;
-  font-size: 25rpx;
-  line-height: 36rpx;
+  font-size: 22rpx;
+  line-height: 32rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
