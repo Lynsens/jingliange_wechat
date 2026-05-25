@@ -173,6 +173,14 @@
   line-height: 34rpx;
 }
 
+.field-help {
+  display: block;
+  margin-top: 6rpx;
+  color: #a4836e;
+  font-size: 22rpx;
+  line-height: 32rpx;
+}
+
 .textarea {
   height: 152rpx;
   margin-top: 10rpx;
@@ -540,6 +548,20 @@
 .combo-menu-option-selected {
   border-color: #ad693e;
   background: #f8dfca;
+}
+
+.combo-menu-option-slot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32rpx;
+  border-radius: 999rpx;
+  background: #ad693e;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 32rpx;
+  padding: 0 14rpx;
+  margin-bottom: 8rpx;
 }
 
 .combo-menu-option-name,

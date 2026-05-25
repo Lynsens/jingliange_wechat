@@ -44,6 +44,7 @@ const fallbackActivities = [
 
 const colors = ['green', 'pink', 'gold']
 const MAX_DETAIL_ITEMS = 3
+const RECOMMENDATION_SLOTS = ['前菜/小菜', '主食', '热食', '甜品/饮品']
 
 function splitIngredientNames(value) {
   return String(value || '')
@@ -229,11 +230,18 @@ function normalizeCombo(combo) {
     return null
   }
 
+  const items = combo.items.slice(0, 4).map((item, index) => normalizeMenu(item, index))
+  const title = combo.title && combo.title.indexOf('搭配') === -1 ? combo.title : '今日推荐'
   return {
     id: combo.id,
-    title: combo.title || '搭配建议',
+    title,
     description: combo.description || '按今日菜品推荐更健康、更饱足的取餐方式。',
-    items: combo.items.slice(0, 4).map((item, index) => normalizeMenu(item, index))
+    items,
+    slots: RECOMMENDATION_SLOTS.map((label, index) => ({
+      label,
+      order: index + 1,
+      menu: items[index] || null
+    }))
   }
 }
 
@@ -496,6 +504,7 @@ Page({
     }))
 
     const combo = this.data.comboRecommendation
+    let updatedComboItems = []
     const comboRecommendation = combo ? Object.assign({}, combo, {
       items: combo.items.map((item) => {
         if (item.id !== menuId) {
@@ -509,6 +518,14 @@ Page({
         })
       })
     }) : null
+    if (comboRecommendation) {
+      updatedComboItems = comboRecommendation.items
+      comboRecommendation.slots = RECOMMENDATION_SLOTS.map((label, index) => ({
+        label,
+        order: index + 1,
+        menu: updatedComboItems[index] || null
+      }))
+    }
 
     this.setData({
       menus: this.filterMenus(this.data.keyword),

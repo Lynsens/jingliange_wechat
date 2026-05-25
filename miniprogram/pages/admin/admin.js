@@ -6,6 +6,7 @@ const UNIT_OPTIONS = ['g', 'ml']
 const MAX_METRIC_ROWS = 3
 const IMAGE_COMPRESS_QUALITY = 72
 const IMAGE_COMPRESS_WIDTH = 1280
+const RECOMMENDATION_SLOTS = ['前菜/小菜', '主食', '热食', '甜品/饮品']
 const ARCHIVE_FILTERS = [
   { key: 'all', label: '全部' },
   { key: 'active', label: '上架中' },
@@ -62,8 +63,8 @@ function createActivityForm() {
 
 function createComboForm() {
   return {
-    title: '',
-    description: '',
+    title: '今日推荐',
+    description: '按今日菜品推荐更健康、更饱足的取餐方式。',
     isActive: false,
     menuIds: []
   }
@@ -242,10 +243,12 @@ function formatCombo(item) {
   })) : []
   return {
     id: item.id,
-    title: item.title || '未命名搭配',
+    title: item.title || '今日推荐',
     description: item.description || '暂无说明',
     isActive: Number(item.is_active || 0) === 1,
-    items,
+    items: items.map((menu, index) => Object.assign({}, menu, {
+      slotLabel: RECOMMENDATION_SLOTS[index] || '推荐'
+    })),
     menuIds: items.map((menu) => menu.id)
   }
 }
@@ -271,7 +274,9 @@ function buildComboMenuOptions(menus, selectedIds) {
   return menus
     .filter((item) => !item.isArchived)
     .map((item) => Object.assign({}, item, {
-      selected: Boolean(selectedSet[item.id])
+      selected: Boolean(selectedSet[item.id]),
+      selectedIndex: selectedIds.indexOf(item.id),
+      slotLabel: selectedSet[item.id] ? RECOMMENDATION_SLOTS[selectedIds.indexOf(item.id)] : ''
     }))
 }
 
@@ -582,7 +587,7 @@ Page({
     } catch (e) {
       this.setData({ loading: false })
       wx.showToast({
-        title: '搭配加载失败',
+        title: '推荐加载失败',
         icon: 'none'
       })
     }
@@ -1267,7 +1272,7 @@ Page({
     const combo = this.data.combos.find((item) => item.id === id)
     if (!combo) {
       wx.showToast({
-        title: '搭配不存在',
+        title: '推荐不存在',
         icon: 'none'
       })
       return
@@ -1324,7 +1329,7 @@ Page({
     } else {
       if (current.length >= 4) {
         wx.showToast({
-          title: '最多选择 4 道菜',
+          title: '四类各选一道',
           icon: 'none'
         })
         return
@@ -1343,9 +1348,9 @@ Page({
     const title = form.title.trim()
     const description = form.description.trim()
 
-    if (!title || !form.menuIds.length) {
+    if (!title || form.menuIds.length !== 4) {
       wx.showToast({
-        title: '请填写搭配并选择菜品',
+        title: '请按四类选择 4 道菜',
         icon: 'none'
       })
       return
@@ -1400,7 +1405,7 @@ Page({
     const title = e.currentTarget.dataset.title
 
     wx.showModal({
-      title: '删除搭配',
+      title: '删除推荐',
       content: `确认删除「${title}」？`,
       confirmColor: '#ad693e',
       success: async (res) => {

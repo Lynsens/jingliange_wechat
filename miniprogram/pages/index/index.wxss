@@ -270,14 +270,14 @@
   text-align: center;
 }
 
-.combo-items {
+.recommendation-flow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10rpx;
   margin-top: 14rpx;
 }
 
-.combo-item {
+.recommendation-slot {
   display: flex;
   min-width: 0;
   gap: 10rpx;
@@ -287,11 +287,42 @@
   padding: 10rpx;
 }
 
+.recommendation-slot-empty {
+  opacity: 0.72;
+}
+
+.recommendation-index {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34rpx;
+  height: 34rpx;
+  border-radius: 999rpx;
+  background: #ad693e;
+  color: #fff;
+  font-size: 19rpx;
+  font-weight: 800;
+}
+
+.recommendation-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.recommendation-label {
+  display: block;
+  color: #ad693e;
+  font-size: 20rpx;
+  font-weight: 800;
+  line-height: 26rpx;
+}
+
 .combo-photo,
 .combo-art {
   flex: 0 0 auto;
-  width: 74rpx;
-  height: 74rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 10rpx;
   background: #f8c9a4;
 }
@@ -302,20 +333,15 @@
   justify-content: center;
   color: #4b2717;
   font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 800;
-}
-
-.combo-copy {
-  min-width: 0;
-  flex: 1;
 }
 
 .combo-menu-name {
   color: #17120f;
-  font-size: 24rpx;
+  font-size: 23rpx;
   font-weight: 800;
-  line-height: 32rpx;
+  line-height: 30rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -324,8 +350,8 @@
 .combo-menu-desc {
   margin-top: 2rpx;
   color: #7b6253;
-  font-size: 20rpx;
-  line-height: 28rpx;
+  font-size: 19rpx;
+  line-height: 26rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
