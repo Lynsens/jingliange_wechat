@@ -44,10 +44,7 @@
 
       <view wx:if="{{comboRecommendation}}" class="combo-card">
         <view class="combo-head">
-          <view class="combo-title-block">
-            <text class="combo-title">{{comboRecommendation.title}}</text>
-            <text class="combo-desc">{{comboRecommendation.description}}</text>
-          </view>
+          <text class="combo-desc">{{comboRecommendation.description}}</text>
         </view>
         <view class="recommendation-flow">
           <view
