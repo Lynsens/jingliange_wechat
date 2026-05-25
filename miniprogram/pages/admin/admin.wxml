@@ -297,31 +297,52 @@
       <switch checked="{{comboForm.isActive}}" color="#ad693e" bindchange="onComboActiveChange" />
     </view>
     <text class="field-label">选择菜品（四类各选一道）</text>
-    <text class="field-help">每个分类只能选择一道菜。若某一类没有菜品，请先在菜单管理中把菜品分类调整好。</text>
+    <text class="field-help">先点分类槽位，再在下方搜索并选择菜品。</text>
     <view class="recommendation-slot-picker">
-      <view wx:for="{{comboMenuOptions}}" wx:key="slotLabel" class="recommendation-slot-panel">
-        <view class="recommendation-slot-head">
-          <text class="recommendation-slot-title">{{item.slotIndex + 1}} · {{item.slotLabel}}</text>
-          <text class="recommendation-slot-selected">{{item.selectedName || '未选择'}}</text>
+      <view
+        wx:for="{{comboMenuOptions}}"
+        wx:key="slotLabel"
+        class="recommendation-slot-card {{activeComboSlotIndex === item.slotIndex ? 'recommendation-slot-card-active' : ''}} {{item.selectedId ? 'recommendation-slot-card-filled' : ''}}"
+        data-slot-index="{{item.slotIndex}}"
+        bindtap="selectComboSlot"
+      >
+        <text class="recommendation-slot-title">{{item.slotIndex + 1}} · {{item.slotLabel}}</text>
+        <text class="recommendation-slot-selected">{{item.selectedName || '未选择'}}</text>
+      </view>
+    </view>
+    <view class="combo-picker-panel">
+      <view class="combo-picker-head">
+        <text class="combo-picker-title">选择{{activeComboSlotLabel}}</text>
+        <text class="combo-picker-selected">{{activeComboSlotSelectedName}}</text>
+      </view>
+      <view class="admin-search combo-picker-search">
+        <text class="admin-search-icon">⌕</text>
+        <input
+          class="admin-search-input"
+          placeholder="搜索菜名、介绍或 ID"
+          placeholder-class="placeholder"
+          value="{{comboPickerKeyword}}"
+          bindinput="onComboPickerKeywordInput"
+        />
+        <view wx:if="{{comboPickerKeyword}}" class="admin-clear-btn" bindtap="clearComboPickerKeyword">×</view>
+      </view>
+      <scroll-view wx:if="{{comboPickerOptions.length > 0}}" class="combo-picker-scroll" scroll-y show-scrollbar="{{false}}">
+        <view
+          wx:for="{{comboPickerOptions}}"
+          wx:key="id"
+          class="combo-menu-option {{item.selected ? 'combo-menu-option-selected' : ''}} {{item.disabled ? 'combo-menu-option-disabled' : ''}}"
+          data-id="{{item.id}}"
+          data-slot-index="{{activeComboSlotIndex}}"
+          data-disabled="{{item.disabled ? 1 : 0}}"
+          bindtap="toggleComboMenu"
+        >
+          <text wx:if="{{item.selected}}" class="combo-menu-option-slot">已选</text>
+          <text class="combo-menu-option-name">{{item.name}}</text>
+          <text class="combo-menu-option-desc">{{item.desc}}</text>
         </view>
-        <view wx:if="{{item.options.length > 0}}" class="combo-menu-picker">
-          <view
-            wx:for="{{item.options}}"
-            wx:for-item="option"
-            wx:key="id"
-            class="combo-menu-option {{option.selected ? 'combo-menu-option-selected' : ''}} {{option.disabled ? 'combo-menu-option-disabled' : ''}}"
-            data-id="{{option.id}}"
-            data-slot-index="{{item.slotIndex}}"
-            bindtap="toggleComboMenu"
-          >
-            <text wx:if="{{option.selected}}" class="combo-menu-option-slot">已选</text>
-            <text class="combo-menu-option-name">{{option.name}}</text>
-            <text class="combo-menu-option-desc">{{option.desc}}</text>
-          </view>
-        </view>
-        <view wx:else class="slot-empty-card">
-          <text>暂无{{item.slotLabel}}菜品</text>
-        </view>
+      </scroll-view>
+      <view wx:else class="slot-empty-card">
+        <text>{{comboPickerKeyword ? '没有找到匹配菜品' : '暂无该分类菜品，请先在菜单管理中调整分类。'}}</text>
       </view>
     </view>
     <button class="primary-btn" loading="{{saving}}" bindtap="submitCombo">{{editingComboId ? '更新推荐' : '保存推荐'}}</button>

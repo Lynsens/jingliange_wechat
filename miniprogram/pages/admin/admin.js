@@ -308,6 +308,62 @@ function buildComboMenuOptions(menus, selectedIds) {
   })
 }
 
+function normalizeComboSlotIndex(slotIndex) {
+  const index = Number(slotIndex)
+  if (index >= 0 && index < RECOMMENDATION_SLOTS.length) {
+    return index
+  }
+  return 0
+}
+
+function buildComboPickerOptions(menus, selectedIds, slotIndex, keyword) {
+  const normalizedIds = normalizeComboMenuIds(selectedIds)
+  const activeSlotIndex = normalizeComboSlotIndex(slotIndex)
+  const slotLabel = RECOMMENDATION_SLOTS[activeSlotIndex]
+  const text = String(keyword || '').trim().toLowerCase()
+  const selectedElsewhere = {}
+  normalizedIds.forEach((id, index) => {
+    if (id && index !== activeSlotIndex) {
+      selectedElsewhere[id] = true
+    }
+  })
+
+  return menus
+    .filter((item) => !item.isArchived && item.category === slotLabel)
+    .filter((item) => {
+      if (!text) {
+        return true
+      }
+      return `${item.id} ${item.name} ${item.desc}`.toLowerCase().indexOf(text) !== -1
+    })
+    .map((item) => Object.assign({}, item, {
+      selected: item.id === normalizedIds[activeSlotIndex],
+      disabled: Boolean(selectedElsewhere[item.id])
+    }))
+    .sort((a, b) => {
+      if (a.selected !== b.selected) {
+        return a.selected ? -1 : 1
+      }
+      if (a.disabled !== b.disabled) {
+        return a.disabled ? 1 : -1
+      }
+      return Number(a.id || 0) - Number(b.id || 0)
+    })
+}
+
+function buildComboEditorData(menus, selectedIds, slotIndex, keyword) {
+  const activeSlotIndex = normalizeComboSlotIndex(slotIndex)
+  const comboMenuOptions = buildComboMenuOptions(menus, selectedIds)
+  const activeSlot = comboMenuOptions[activeSlotIndex] || {}
+  return {
+    activeComboSlotIndex: activeSlotIndex,
+    activeComboSlotLabel: activeSlot.slotLabel || RECOMMENDATION_SLOTS[activeSlotIndex],
+    activeComboSlotSelectedName: activeSlot.selectedName || '未选择',
+    comboMenuOptions,
+    comboPickerOptions: buildComboPickerOptions(menus, selectedIds, activeSlotIndex, keyword)
+  }
+}
+
 function formatSuggestion(item) {
   const userName = item.user_nickname || item.user_id || '匿名用户'
   const handled = Number(item.handle_status || 0) === 1
@@ -424,6 +480,11 @@ Page({
     editingComboId: 0,
     comboForm: createComboForm(),
     comboMenuOptions: [],
+    comboPickerKeyword: '',
+    comboPickerOptions: [],
+    activeComboSlotIndex: 0,
+    activeComboSlotLabel: RECOMMENDATION_SLOTS[0],
+    activeComboSlotSelectedName: '未选择',
     commentKeyword: '',
     comments: [],
     displayComments: [],
@@ -527,6 +588,11 @@ Page({
       editingComboId: 0,
       comboForm: createComboForm(),
       comboMenuOptions: [],
+      comboPickerKeyword: '',
+      comboPickerOptions: [],
+      activeComboSlotIndex: 0,
+      activeComboSlotLabel: RECOMMENDATION_SLOTS[0],
+      activeComboSlotSelectedName: '未选择',
       commentKeyword: '',
       comments: [],
       displayComments: [],
@@ -572,7 +638,7 @@ Page({
       this.setData({
         menus,
         displayMenus: filterAdminMenus(menus, this.data.menuKeyword),
-        comboMenuOptions: buildComboMenuOptions(menus, this.data.comboForm.menuIds),
+        ...buildComboEditorData(menus, this.data.comboForm.menuIds, this.data.activeComboSlotIndex, this.data.comboPickerKeyword),
         loading: false
       })
     } catch (e) {
@@ -1293,11 +1359,13 @@ Page({
   },
 
   startCreateCombo() {
+    const comboForm = createComboForm()
     this.setData({
       showComboEditor: true,
       editingComboId: 0,
-      comboForm: createComboForm(),
-      comboMenuOptions: buildComboMenuOptions(this.data.menus, [])
+      comboForm,
+      comboPickerKeyword: '',
+      ...buildComboEditorData(this.data.menus, comboForm.menuIds, 0, '')
     })
     if (wx.pageScrollTo) {
       wx.pageScrollTo({
@@ -1318,6 +1386,7 @@ Page({
       return
     }
 
+    const menuIds = normalizeComboMenuIds(combo.menuIds)
     this.setData({
       showComboEditor: true,
       editingComboId: id,
@@ -1325,9 +1394,10 @@ Page({
         title: combo.title,
         description: combo.description,
         isActive: combo.isActive,
-        menuIds: normalizeComboMenuIds(combo.menuIds)
+        menuIds
       },
-      comboMenuOptions: buildComboMenuOptions(this.data.menus, combo.menuIds)
+      comboPickerKeyword: '',
+      ...buildComboEditorData(this.data.menus, menuIds, menuIds.findIndex((menuId) => !menuId), '')
     })
     if (wx.pageScrollTo) {
       wx.pageScrollTo({
@@ -1342,7 +1412,8 @@ Page({
       showComboEditor: false,
       editingComboId: 0,
       comboForm: createComboForm(),
-      comboMenuOptions: buildComboMenuOptions(this.data.menus, [])
+      comboPickerKeyword: '',
+      ...buildComboEditorData(this.data.menus, [], 0, '')
     })
   },
 
@@ -1359,10 +1430,52 @@ Page({
     })
   },
 
+  selectComboSlot(e) {
+    const slotIndex = normalizeComboSlotIndex(e.currentTarget.dataset.slotIndex)
+    this.setData({
+      comboPickerKeyword: '',
+      ...buildComboEditorData(this.data.menus, this.data.comboForm.menuIds, slotIndex, '')
+    })
+  },
+
+  onComboPickerKeywordInput(e) {
+    const comboPickerKeyword = e.detail.value
+    this.setData({
+      comboPickerKeyword,
+      comboPickerOptions: buildComboPickerOptions(
+        this.data.menus,
+        this.data.comboForm.menuIds,
+        this.data.activeComboSlotIndex,
+        comboPickerKeyword
+      )
+    })
+  },
+
+  clearComboPickerKeyword() {
+    this.setData({
+      comboPickerKeyword: '',
+      comboPickerOptions: buildComboPickerOptions(
+        this.data.menus,
+        this.data.comboForm.menuIds,
+        this.data.activeComboSlotIndex,
+        ''
+      )
+    })
+  },
+
   toggleComboMenu(e) {
     const id = Number(e.currentTarget.dataset.id)
+    const disabled = Number(e.currentTarget.dataset.disabled) === 1
     const slotIndex = Number(e.currentTarget.dataset.slotIndex)
     const current = normalizeComboMenuIds(this.data.comboForm.menuIds)
+
+    if (disabled) {
+      wx.showToast({
+        title: '该菜品已被其它分类选择',
+        icon: 'none'
+      })
+      return
+    }
 
     if (slotIndex < 0 || slotIndex >= RECOMMENDATION_SLOTS.length) {
       return
@@ -1374,15 +1487,19 @@ Page({
       }
     })
 
-    if (current[slotIndex] === id) {
+    const wasSelected = current[slotIndex] === id
+    if (wasSelected) {
       current[slotIndex] = 0
     } else {
       current[slotIndex] = id
     }
 
+    const nextEmptyIndex = current.findIndex((menuId) => !menuId)
+    const nextSlotIndex = !wasSelected && nextEmptyIndex >= 0 ? nextEmptyIndex : slotIndex
     this.setData({
       'comboForm.menuIds': current,
-      comboMenuOptions: buildComboMenuOptions(this.data.menus, current)
+      comboPickerKeyword: '',
+      ...buildComboEditorData(this.data.menus, current, nextSlotIndex, '')
     })
   },
 
