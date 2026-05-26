@@ -38,12 +38,9 @@
     </scroll-view>
 
     <view hidden="{{activeTab !== 'home'}}" class="section home-section">
-      <view class="section-header">
-        <text class="section-title">今日推荐</text>
-      </view>
-
       <view wx:if="{{comboRecommendation}}" class="combo-card">
         <view class="combo-head">
+          <text class="combo-title">{{comboRecommendation.title}}</text>
           <text class="combo-desc">{{comboRecommendation.description}}</text>
         </view>
         <view class="recommendation-flow">
@@ -72,10 +69,6 @@
       <view wx:else class="empty-card">
         <text class="empty-card-title">暂无今日推荐</text>
         <text class="empty-card-desc">后台设置推荐后，这里会显示健康取餐参考。</text>
-      </view>
-
-      <view class="section-header compact">
-        <text class="section-title">近期活动</text>
       </view>
 
       <view wx:if="{{homeActivities.length > 0}}" class="activity-list">
