@@ -25,26 +25,20 @@
   display: block;
 }
 
-.hero-kicker,
-.hero-title {
+.hero-kicker-img,
+.hero-title-img {
   display: block;
 }
 
-.hero-kicker {
-  color: #7c4a27;
-  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
-  font-size: 30rpx;
-  font-weight: 500;
-  line-height: 40rpx;
+.hero-kicker-img {
+  width: 118rpx;
+  height: 39rpx;
 }
 
-.hero-title {
+.hero-title-img {
   margin-top: 10rpx;
-  color: #17120f;
-  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
-  font-size: 46rpx;
-  font-weight: 600;
-  line-height: 56rpx;
+  width: 420rpx;
+  height: 64rpx;
 }
 
 .hero-desc {
@@ -1101,13 +1095,10 @@
   border-radius: 12rpx;
 }
 
-.about-title {
+.about-title-img {
   display: block;
-  color: #17120f;
-  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
-  font-size: 42rpx;
-  font-weight: 600;
-  line-height: 54rpx;
+  width: 140rpx;
+  height: 46rpx;
 }
 
 .info-grid {

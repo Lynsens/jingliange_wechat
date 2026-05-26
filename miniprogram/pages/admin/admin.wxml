@@ -1,6 +1,6 @@
 <view class="admin-page">
   <view class="admin-hero">
-    <text class="admin-kicker">净莲阁</text>
+    <image class="admin-kicker-img" src="../../images/brand-name.png" mode="aspectFit"></image>
     <text class="admin-desc">{{adminAuthed ? '管理素食菜单、今日推荐、近期活动、用户评论与建议箱。' : '请输入管理员账号和密码后继续。'}}</text>
   </view>
 

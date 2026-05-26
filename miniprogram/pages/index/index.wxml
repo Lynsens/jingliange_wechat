@@ -3,8 +3,8 @@
     <view class="hero">
       <view class="hero-main">
         <view class="hero-copy">
-          <text class="hero-kicker">净莲阁</text>
-          <text class="hero-title">素食 · 文化 · 净心</text>
+          <image class="hero-kicker-img" src="../../images/brand-name.png" mode="aspectFit"></image>
+          <image class="hero-title-img" src="../../images/brand-tagline.png" mode="aspectFit"></image>
           <text class="hero-desc">今日菜单、活动与随喜功德，一处查看。</text>
           <view class="hero-ink-line"></view>
         </view>
@@ -193,7 +193,7 @@
     <view hidden="{{activeTab !== 'about'}}" class="section">
       <view class="about-panel">
         <image class="about-logo" src="../../images/jingliange-logo.jpg" mode="aspectFit"></image>
-        <text class="about-title">净莲阁</text>
+        <image class="about-title-img" src="../../images/brand-name.png" mode="aspectFit"></image>
         <text class="about-copy">{{aboutDescription}}</text>
       </view>
 

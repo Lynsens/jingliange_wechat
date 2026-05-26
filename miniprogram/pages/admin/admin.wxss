@@ -30,11 +30,10 @@
   display: block;
 }
 
-.admin-kicker {
-  color: #7c4a27;
-  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", serif;
-  font-size: 30rpx;
-  line-height: 40rpx;
+.admin-kicker-img {
+  display: block;
+  width: 118rpx;
+  height: 39rpx;
 }
 
 .admin-desc {
