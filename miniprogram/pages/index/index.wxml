@@ -54,9 +54,6 @@
             <view class="recommendation-media">
               <image wx:if="{{item.menu && item.menu.imageUrl}}" src="{{item.menu.imageUrl}}" mode="aspectFill" class="combo-photo"></image>
               <image wx:elif="{{item.menu}}" src="../../images/jingliange-logo.jpg" mode="aspectFit" class="combo-photo logo-default-photo"></image>
-              <view class="recommendation-index">
-                <text>{{item.order}}</text>
-              </view>
             </view>
             <view class="recommendation-copy">
               <text wx:if="{{item.menu}}" class="combo-menu-name">{{item.menu.name}}</text>

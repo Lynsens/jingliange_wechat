@@ -268,22 +268,6 @@
   opacity: 0.72;
 }
 
-.recommendation-index {
-  position: absolute;
-  top: -8rpx;
-  left: -8rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44rpx;
-  height: 44rpx;
-  border-radius: 999rpx;
-  background: #ad693e;
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 800;
-}
-
 .recommendation-copy {
   min-width: 0;
   margin-top: 12rpx;
